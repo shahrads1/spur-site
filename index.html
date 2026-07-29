@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spur — spontaneous plans in Toronto</title>
+<meta name="description" content="Spur is a Toronto app for spontaneous, in-person plans. Post what you feel like doing, people nearby join in, and everyone actually shows up.">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<meta property="og:title" content="Spur — spontaneous plans in Toronto">
+<meta property="og:description" content="Post what you feel like doing. People nearby join in. Everyone actually shows up.">
+<meta property="og:image" content="https://spur.surf/assets/icon.png">
+<meta property="og:url" content="https://spur.surf">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --coral: #FF6B4A;
+    --coral-deep: #E8532F;
+    --teal: #3DBFA0;
+    --teal-ink: #1E8A70;
+    --amber: #F5A623;
+    --paper: #FDF8F4;
+    --card: #FFFFFF;
+    --ink: #1C1410;
+    --muted: #7A6E68;
+    --line: #EDE8E3;
+    --radius: 20px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Schibsted Grotesk", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .display { font-family: "Baloo 2", "Schibsted Grotesk", sans-serif; }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible {
+    outline: 3px solid var(--coral);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── header ─────────────────────────────── */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav {
+    display: flex; align-items: center; gap: 28px;
+    padding: 14px 0;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; margin-right: auto;
+  }
+  .brand img { width: 34px; height: 34px; border-radius: 9px; }
+  .brand span {
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 700; font-size: 24px; letter-spacing: -0.02em;
+    color: var(--coral-deep);
+  }
+  .nav a:not(.brand):not(.cta) {
+    text-decoration: none; font-weight: 500; font-size: 15px; color: var(--muted);
+  }
+  .nav a:not(.brand):not(.cta):hover { color: var(--ink); }
+  .cta {
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 700; font-size: 16px;
+    background: var(--coral); color: #fff;
+    text-decoration: none;
+    padding: 9px 20px 10px; border-radius: 999px;
+    transition: transform .15s ease, background .15s ease;
+    display: inline-block;
+  }
+  .cta:hover { background: var(--coral-deep); transform: translateY(-1px); }
+  @media (max-width: 640px) { .nav a.navlink { display: none; } }
+
+  /* ── hero ───────────────────────────────── */
+  .hero { padding: 84px 0 30px; text-align: center; }
+  .eyebrow {
+    display: inline-block;
+    font-size: 13.5px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--teal-ink);
+    background: color-mix(in srgb, var(--teal) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--teal) 30%, transparent);
+    padding: 5px 14px; border-radius: 999px;
+    margin-bottom: 26px;
+  }
+  h1 {
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 800;
+    font-size: clamp(56px, 10vw, 108px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin-bottom: 22px;
+  }
+  .q { position: relative; display: inline-block; color: var(--coral); }
+  .spark {
+    position: absolute; top: -0.28em; right: -0.42em;
+    width: 0.52em; height: 0.52em;
+    transform-origin: 30% 80%;
+  }
+  .hero-sub {
+    max-width: 560px; margin: 0 auto 34px;
+    font-size: 19.5px; color: var(--muted);
+  }
+  .hero-sub strong { color: var(--ink); font-weight: 600; }
+  .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .cta.big { font-size: 18px; padding: 13px 30px 14px; }
+  .ghost {
+    font-weight: 600; font-size: 16px;
+    color: var(--ink); text-decoration: none;
+    padding: 13px 24px 14px;
+    border: 1.5px solid var(--line); border-radius: 999px;
+    background: var(--card);
+    transition: border-color .15s ease;
+  }
+  .ghost:hover { border-color: var(--muted); }
+
+  /* ── feed strip ─────────────────────────── */
+  .feed { padding: 56px 0 20px; overflow: hidden; }
+  .feed-row {
+    display: flex; gap: 18px; justify-content: center; flex-wrap: wrap;
+    max-width: 1010px; margin: 0 auto; padding: 0 24px;
+  }
+  .post {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    width: 225px; text-align: left;
+    box-shadow: 0 1px 2px rgba(28,20,16,.04), 0 10px 28px -18px rgba(28,20,16,.18);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .post:nth-child(odd)  { transform: rotate(-1.1deg); }
+  .post:nth-child(even) { transform: rotate(1.2deg) translateY(8px); }
+  .post:hover {
+    transform: rotate(0deg) translateY(-4px);
+    box-shadow: 0 2px 4px rgba(28,20,16,.05), 0 18px 40px -18px rgba(28,20,16,.25);
+  }
+  .post .what {
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 700; font-size: 18.5px; line-height: 1.25;
+    margin-bottom: 4px;
+  }
+  .post .where { font-size: 14.5px; color: var(--muted); margin-bottom: 12px; }
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; }
+  .chip {
+    font-size: 12.5px; font-weight: 600;
+    padding: 3px 10px 4px; border-radius: 999px;
+  }
+  .chip.when { background: color-mix(in srgb, var(--coral) 13%, transparent); color: var(--coral-deep); }
+  .chip.who  { background: color-mix(in srgb, var(--teal) 15%, transparent); color: var(--teal-ink); }
+  .chip.deal { background: color-mix(in srgb, var(--amber) 18%, transparent); color: #A66A05; }
+  .feed-note { text-align: center; font-size: 13.5px; color: var(--muted); margin-top: 30px; }
+
+  /* ── sections ───────────────────────────── */
+  section { padding: 84px 0; }
+  .sec-head { max-width: 620px; margin-bottom: 48px; }
+  h2 {
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 700; font-size: clamp(30px, 4.6vw, 42px);
+    line-height: 1.12; letter-spacing: -0.015em;
+    margin-bottom: 12px;
+  }
+  .sec-head p { color: var(--muted); font-size: 18px; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+  .step {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 26px 26px 28px;
+  }
+  .step .num {
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 800; font-size: 15px;
+    color: var(--coral-deep);
+    background: color-mix(in srgb, var(--coral) 12%, transparent);
+    width: 34px; height: 34px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+  .step h3 {
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 700; font-size: 21px;
+    margin-bottom: 6px;
+  }
+  .step p { color: var(--muted); font-size: 16px; }
+  .step p em { font-style: normal; color: var(--ink); font-weight: 600; }
+
+  /* show-up section: tinted */
+  .showup { background: var(--ink); color: var(--paper); border-radius: 34px; }
+  .showup-inner { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+  .showup h2 { color: #fff; }
+  .showup .lede { color: #C9BFB8; font-size: 18px; max-width: 620px; margin-bottom: 44px; }
+  .showup .lede strong { color: var(--amber); font-weight: 600; }
+  .trust { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  @media (max-width: 760px) { .trust { grid-template-columns: 1fr; } }
+  .trust h3 {
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 700; font-size: 19px; color: #fff;
+    margin-bottom: 6px; display: flex; align-items: center; gap: 9px;
+  }
+  .trust h3 .dot { width: 9px; height: 9px; border-radius: 99px; background: var(--teal); flex-shrink: 0; }
+  .trust p { color: #A79C94; font-size: 15.5px; }
+  .showup-wrap { padding: 0 14px; }
+  .showup section { padding: 72px 0; }
+
+  /* about */
+  .about p { max-width: 640px; color: var(--muted); font-size: 17.5px; }
+  .about p + p { margin-top: 14px; }
+  .about strong { color: var(--ink); font-weight: 600; }
+
+  /* ── footer ─────────────────────────────── */
+  footer { border-top: 1px solid var(--line); padding: 44px 0 56px; }
+  .foot {
+    display: flex; flex-wrap: wrap; gap: 28px;
+    justify-content: space-between; align-items: flex-start;
+  }
+  .foot-brand { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+  .foot-brand img { width: 26px; height: 26px; border-radius: 7px; }
+  .foot-brand span { font-family: "Baloo 2", sans-serif; font-weight: 700; font-size: 19px; color: var(--coral-deep); }
+  .foot small { display: block; color: var(--muted); font-size: 13.5px; line-height: 1.7; }
+  .foot nav { display: flex; flex-direction: column; gap: 8px; }
+  .foot nav a { font-size: 14.5px; color: var(--muted); text-decoration: none; }
+  .foot nav a:hover { color: var(--ink); text-decoration: underline; }
+  .foot .col-label {
+    font-size: 12px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--ink); margin-bottom: 10px;
+  }
+
+  /* ── motion ─────────────────────────────── */
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes sparkpop {
+    0% { opacity: 0; transform: scale(.2) rotate(-18deg); }
+    70% { opacity: 1; transform: scale(1.18) rotate(4deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .hero .eyebrow, .hero h1, .hero-sub, .hero-actions { animation: rise .6s ease both; }
+  .hero h1 { animation-delay: .07s; }
+  .hero-sub { animation-delay: .16s; }
+  .hero-actions { animation-delay: .24s; }
+  .spark { animation: sparkpop .55s cubic-bezier(.2,1.4,.4,1) .55s both; }
+  @media (prefers-reduced-motion: reduce) {
+    .hero .eyebrow, .hero h1, .hero-sub, .hero-actions, .spark { animation: none; }
+    .post, .cta { transition: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><img src="/assets/icon.png" alt="" width="34" height="34"><span>spur</span></a>
+    <a class="navlink" href="#how">How it works</a>
+    <a class="navlink" href="#showup">Why people show up</a>
+    <a class="navlink" href="#about">About</a>
+    <a class="cta" href="mailto:hello@spur.surf?subject=Spur%20beta">Join the beta</a>
+  </div>
+</header>
+
+<main>
+  <div class="hero wrap">
+    <span class="eyebrow">Toronto &middot; in beta on iOS</span>
+    <h1 class="display">Anyone down<span class="q">?<svg class="spark" viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="#F5A623" stroke-width="14" stroke-linecap="round"><path d="M50 38 L50 8"/><path d="M22 52 L4 30"/><path d="M78 52 L96 30"/></svg></span></h1>
+    <p class="hero-sub">Spur is the app for spontaneous plans. <strong>Post what you feel like doing</strong> — pickup ball, a coffee, a late-night walk — and people nearby join in. Tonight, not "sometime."</p>
+    <div class="hero-actions">
+      <a class="cta big" href="mailto:hello@spur.surf?subject=Spur%20beta">Join the Toronto beta</a>
+      <a class="ghost" href="#how">See how it works</a>
+    </div>
+  </div>
+
+  <div class="feed" aria-label="Example activity posts">
+    <div class="feed-row">
+      <div class="post">
+        <div class="what">Pickup basketball 🏀</div>
+        <div class="where">Trinity Bellwoods Park</div>
+        <div class="chips"><span class="chip when">Tonight 7:00</span><span class="chip who">4 of 6 in</span></div>
+      </div>
+      <div class="post">
+        <div class="what">Coffee + sketching ☕</div>
+        <div class="where">Kensington Market</div>
+        <div class="chips"><span class="chip when">Tmrw 10:30</span><span class="chip who">2 in</span></div>
+      </div>
+      <div class="post">
+        <div class="what">Go-karting crew 🏎️</div>
+        <div class="where">Bridgestone Academy</div>
+        <div class="chips"><span class="chip when">Sat 2:00</span><span class="chip deal">Group deal</span></div>
+      </div>
+      <div class="post">
+        <div class="what">Sunset walk</div>
+        <div class="where">High Park</div>
+        <div class="chips"><span class="chip when">Tonight 8:30</span><span class="chip who">3 in</span></div>
+      </div>
+    </div>
+    <p class="feed-note">Real posts look like this — activity, place, time, and who's in.</p>
+  </div>
+
+  <section id="how" class="wrap">
+    <div class="sec-head">
+      <h2 class="display">Three steps, zero group-chat purgatory</h2>
+      <p>No event pages to build, no polls about which weekend. Say the thing, do the thing.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h3 class="display">Say what you're up for</h3>
+        <p><em>"Volleyball at Woodbine, 6pm."</em> That's the whole post. Add a venue or a time window if you want.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3 class="display">People nearby jump in</h3>
+        <p>Your post shows up for people around you who are into the same thing. They tap in, you see who's coming.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3 class="display">Everyone actually shows up</h3>
+        <p>Plans on Spur are tonight or this week — not "we should hang sometime." Reliability is tracked, so flaking has a cost.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="showup-wrap">
+    <div class="showup" id="showup">
+      <section class="showup-inner">
+        <h2 class="display">Built so people show up</h2>
+        <p class="lede">Every plan app dies the same death: everyone's "interested," nobody comes. Spur's whole design fights that — <strong>showing up is the product.</strong></p>
+        <div class="trust">
+          <div>
+            <h3 class="display"><span class="dot"></span>Real people only</h3>
+            <p>Every account is phone-verified — no bots, no burners. Hosts build a visible track record.</p>
+          </div>
+          <div>
+            <h3 class="display"><span class="dot"></span>Deposits beat flaking</h3>
+            <p>Hosts can ask for a small refundable deposit. Show up and it comes right back. Ghost, and it doesn't.</p>
+          </div>
+          <div>
+            <h3 class="display"><span class="dot"></span>Safety isn't an afterthought</h3>
+            <p>Block and report tools, photo moderation, and community guidelines with teeth. Meet in public places, always.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section id="about" class="wrap about">
+    <h2 class="display">Made in Toronto</h2>
+    <p>Spur is built by <strong>Spur Social Corp.</strong>, a Canadian federal corporation headquartered in Toronto. We're starting with one city — ours — and getting spontaneous, in-person hangouts right before going anywhere else.</p>
+    <p>The app is currently in a closed iOS beta. Want in, or want your venue on Spur? Write us: <a href="mailto:hello@spur.surf">hello@spur.surf</a></p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <div class="foot-brand"><img src="/assets/icon.png" alt="" width="26" height="26"><span>spur</span></div>
+      <small>&copy; 2026 Spur Social Corp.<br>Toronto, Ontario, Canada<br><a href="mailto:hello@spur.surf">hello@spur.surf</a></small>
+    </div>
+    <nav aria-label="Legal">
+      <div class="col-label">Legal</div>
+      <a href="/privacy.html">Privacy policy</a>
+      <a href="/terms.html">Terms of service</a>
+      <a href="/community-guidelines.html">Community guidelines</a>
+      <a href="/disclaimer.html">Disclaimer</a>
+    </nav>
+    <nav aria-label="App">
+      <div class="col-label">App</div>
+      <a href="#how">How it works</a>
+      <a href="#showup">Why people show up</a>
+      <a href="mailto:hello@spur.surf?subject=Spur%20beta">Join the beta</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
