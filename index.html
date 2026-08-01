@@ -2075,58 +2075,14 @@ function buildRoad(){
   road.fill.setAttribute('stroke-dasharray', road.len);
   road.line.setAttribute('stroke-dasharray', road.llen);
 
-  /* night activities live WHERE THE MOON IS — two night stretches
-     per page now, so the pills sit at those scroll depths */
-  road.nightTags = [];
-  (function(){
-    var vhNow = window.innerHeight || 900;
-    var LAB = [
-      null,['☾ PATIO DRINKS · 9:00',166],null,   /* BESTIE now rides with the girls (scene tags) */
-      ['☾ LATE BOCCE · 9:15',152],null,['☾ NIGHT MARKET · 11:00',186]   /* rooftop hang deleted (mr7) */
-    ];
-    function lenAtY(targetY){
-      var lo = 0, hi = road.llen, mid, p;
-      for(var i = 0; i < 24; i++){
-        mid = (lo + hi) / 2;
-        p = road.line.getPointAtLength(mid);
-        if(p.y < targetY) lo = mid; else hi = mid;
-      }
-      return (lo + hi) / 2;
-    }
-    [0.25, 0.75].forEach(function(np, ni){
-      var centerY = np * (docH - vhNow) + vhNow * 0.5;
-      for(var k = 0; k < 3; k++){
-        var lab = LAB[ni*3 + k];
-        if(!lab) continue;   /* deleted pill */
-        /* keep the label pills OFF the characters: slide further down the
-           line until the pill's rectangle is clear of every placed scene */
-        var tryY = centerY + (k - 1) * 250, pt, tgx;
-        for(var att = 0; att < 14; att++){
-          pt = road.line.getPointAtLength(lenAtY(tryY));
-          tgx = Math.min(Math.max(pt.x, lab[1]/2 + 16), vw - lab[1]/2 - 16);
-          if(vw >= 640 || !road.overlapsTaken ||
-             !road.overlapsTaken({x:tgx - lab[1]/2, y:pt.y - 52, w:lab[1], h:46}, 10)) break;
-          tryY += 140;
-        }
-        var tg = el('g',{transform:'translate(' + tgx.toFixed(1) + ',' + (pt.y - ((lab[0].indexOf('PATIO') !== -1 || lab[0].indexOf('BESTIE') !== -1) ? 255 : 36)).toFixed(1) + ')', opacity:0});
-        tg.appendChild(el('circle',{cx:(pt.x - tgx).toFixed(1), cy:36, r:4.5, fill:C.ink}));
-        tg.appendChild(el('rect',{x:-lab[1]/2, y:-13, width:lab[1], height:26, rx:13, fill:C.ink}));
-        var tx2 = el('text',{x:0, y:4, 'text-anchor':'middle', fill:C.cream});
-        tx2.textContent = lab[0];
-        tx2.style.font = '700 9.5px "Space Mono", monospace'; tx2.style.letterSpacing = '1px';
-        tg.appendChild(tx2);
-        ((vw < 640 && road.castSvg) || svg).appendChild(tg);
-        road.nightTags.push(tg);
-      }
-    });
-  })();
-
-  /* SCENE TAGS — every activity crew gets its own event pill parked in the
-     open cream beside it (positions traced from the founder's mr4-mr8
-     markups). Anchored to each scene's PLACED rect — fractions of its
-     width/height — so the pills track their scene at any viewport. They
-     join road.cast, so they fade up and breathe like the characters do. */
-  if(vw >= 640 && road.castSvg && road.cast){
+  /* SCENE TAGS — the ONLY event pills on the page (the old moon-gated
+     night pills are gone; they doubled up with these). One per activity
+     crew, parked in the open cream beside it (positions traced from the
+     founder's mr4-mr8 markups), anchored to each scene's PLACED rect —
+     fractions of its width/height — so they track their scene at any
+     viewport. Deliberately plain and always visible: no scroll-reveal
+     dependency, the bars are just THERE when you reach the scene. */
+  if(road.castSvg && road.cast){
     var STAG = {
       cycling:    ['MORNING RIDE WITH BESTIE · 6:30 AM', 258,  0.00, 0.25],
       drinks:     ['PATIO BRUNCH · 10:00 AM',            184,  0.10, -0.06],
@@ -2136,24 +2092,18 @@ function buildRoad(){
       soccer:     ['SOCCER PRACTICE · SUNDAY 10:00',     240,  0.33, -0.15],
       frisbee:    ['☾ MIDNIGHT FRISBEE IN THE PARK',     240,  1.15, 0.08]
     };
-    var sceneTags = [];
     road.cast.forEach(function(c){
       var t = STAG[c.k]; if(!t) return;
       var scx = Math.min(Math.max(c.x + c.w * t[2], t[1]/2 + 16), vw - t[1]/2 - 16);
       var scy = Math.max(c.y + c.h * t[3], 40);
-      var swrap = el('g', {'class':'cast', opacity:window.__castShown ? 1 : 0});
       var stg = el('g',{transform:'translate(' + scx.toFixed(1) + ',' + scy.toFixed(1) + ')'});
       stg.appendChild(el('rect',{x:-t[1]/2, y:-13, width:t[1], height:26, rx:13, fill:C.ink}));
       var stx = el('text',{x:0, y:4, 'text-anchor':'middle', fill:C.cream});
       stx.textContent = t[0];
       stx.style.font = '700 9.5px "Space Mono", monospace'; stx.style.letterSpacing = '1px';
       stg.appendChild(stx);
-      swrap.appendChild(stg);
-      road.castSvg.appendChild(swrap);
-      if(road.takenRects) road.takenRects.push({x:scx - t[1]/2, y:scy - 13, w:t[1], h:26});
-      sceneTags.push({el:swrap, k:'tag-' + c.k, figs:[], x:scx - t[1]/2, y:scy - 13, w:t[1], h:26, i:road.cast.length + sceneTags.length});
+      road.castSvg.appendChild(stg);
     });
-    sceneTags.forEach(function(n){ road.cast.push(n); });
   }
 
   /* objects that trail the line's tip, one per section */
@@ -2208,11 +2158,6 @@ function updateRoad(){
     f.el.setAttribute('transform','translate(' + pt.x.toFixed(1) + ',' + pt.y.toFixed(1) + ') rotate(' + (pos*0.35).toFixed(1) + ')');
     f.el.setAttribute('opacity', vis ? 0.95 : 0);
   });
-  /* night tags glow in with the moon */
-  if(road.nightTags){
-    var mo = window.__moonO || 0;
-    road.nightTags.forEach(function(tg){ tg.setAttribute('opacity', (mo*0.96).toFixed(3)); });
-  }
 }
 
 /* ---------- sun ⇄ moon: scroll 0 = sun, mid-page = moon, end = sun ---------- */
