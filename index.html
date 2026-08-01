@@ -349,6 +349,13 @@
     font-weight:800;letter-spacing:-0.035em;line-height:1.02;
   }
   .panel p{margin-top:13px;font-size:15px;line-height:1.55;opacity:.82}
+  .panel{position:relative}
+  .panel-x{
+    position:absolute;top:5px;right:7px;border:none;background:none;cursor:pointer;
+    font-size:19px;line-height:1;color:var(--ink);opacity:.35;padding:5px;
+  }
+  .panel-x:hover{opacity:1}
+  .panel-x:focus-visible{outline:2px solid var(--path);outline-offset:2px;border-radius:6px}
 
   /* ---------- hero search ---------- */
   .search{
@@ -1589,7 +1596,7 @@ function buildRoad(){
         pt = best;
       }
       var y  = Math.max(pt.y - h * 0.86, 24);
-      var wrap = el('g', {'class':'cast', opacity:0});
+      var wrap = el('g', {'class':'cast', opacity:(REDUCED || window.__castShown) ? 1 : 0});
       var g2 = el('g', {transform:'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + sc.toFixed(4) + ')'});
       g2.innerHTML = inner;
       wrap.appendChild(g2);
@@ -1629,7 +1636,7 @@ function buildRoad(){
           var dy = (st % 2 ? 1 : -1) * Math.ceil(st / 2) * 46;
           if(road.rectClear(px - 10, py + dy - 10, pw + 20, ph + 20)){ py += dy; break; }
         }
-        var pwrap = el('g', {'class':'cast', opacity:0});
+        var pwrap = el('g', {'class':'cast', opacity:(REDUCED || window.__castShown) ? 1 : 0});
         var pg = el('g', {transform:'translate(' + (px - pvb[0] * psc).toFixed(1) + ',' +
                                        (py - pvb[1] * psc).toFixed(1) + ') scale(' + psc.toFixed(4) + ')'});
         pg.innerHTML = SCENES.patties;
@@ -1722,7 +1729,7 @@ function buildRoad(){
         /* on phones the anchor lands on the CTA/meta text — play further
            down the field where the grass is actually empty */
         if(vw < 640){ by += bh * 0.52; }
-        var bwrap = el('g', {'class':'cast', opacity:0});
+        var bwrap = el('g', {'class':'cast', opacity:(REDUCED || window.__castShown) ? 1 : 0});
         var bg = el('g', {transform:'translate(' + bx.toFixed(1) + ',' + by.toFixed(1) + ') scale(' + bsc.toFixed(4) + ')'});
         bg.innerHTML = SCENES.badminton;
         bwrap.appendChild(bg);
@@ -1757,6 +1764,7 @@ function buildRoad(){
      the page. Reduced mode shows them immediately; and a plain setTimeout
      (independent of GSAP entirely) catches any other failure mode. */
   function forceCastVisible(){
+    window.__castShown = true;   /* rebuilds from here on create cast visible */
     document.querySelectorAll('#castlayer g.cast').forEach(function(g){
       if(parseFloat(getComputedStyle(g).opacity || '0') < 0.05){
         g.setAttribute('opacity', '1');
@@ -1765,8 +1773,13 @@ function buildRoad(){
       }
     });
   }
-  if(REDUCED) forceCastVisible();
-  setTimeout(forceCastVisible, 2600);
+  if(REDUCED){
+    forceCastVisible();
+  } else {
+    /* last-resort only: if the animation engine never armed the reveals
+       (blocked CDN, crashed script), show everyone rather than a blank page */
+    setTimeout(function(){ if(!window.__castShown) forceCastVisible(); }, 2600);
+  }
 
   /* ---- panels: nudge each white card off the road into clear cream.
      Uses left/top (not transform) because GSAP owns transform here. ---- */
@@ -2161,10 +2174,20 @@ function skyUpdate(p){
   celes.el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
 }
 
-var roadResizeT;
+var roadResizeT, lastBuildW = window.innerWidth;
 window.addEventListener('resize', function(){
+  /* iOS fires resize every time the URL bar collapses while scrolling —
+     rebuilding the whole world on those made the page flash, teleport and
+     stutter on phones. Only a WIDTH change (rotation, real window resize)
+     warrants a rebuild. */
+  if(window.innerWidth === lastBuildW) return;
   clearTimeout(roadResizeT);
-  roadResizeT = setTimeout(function(){ buildRoad(); if(window.__setupUfo) window.__setupUfo(); if(window.ScrollTrigger) ScrollTrigger.refresh(); }, 220);
+  roadResizeT = setTimeout(function(){
+    lastBuildW = window.innerWidth;
+    buildRoad();
+    if(window.__setupUfo) window.__setupUfo();
+    if(window.ScrollTrigger) ScrollTrigger.refresh();
+  }, 260);
 });
 function rebuildAll(){ buildRoad(); if(window.__setupUfo) window.__setupUfo(); }
 window.addEventListener('load', rebuildAll);
@@ -2333,8 +2356,14 @@ if(!REDUCED){
       .to(b2, {x:1320, y:400, duration:1.8, ease:'sine.in'});
   }
 
-  /* the real characters: fade up as you reach them, then keep breathing */
+  /* the real characters: fade up as you reach them, then keep breathing.
+     The scroll trigger is the ONE owner of the reveal — earlier a 1.6s
+     "reveal everything" failsafe raced it, so a character shown early would
+     blink off and refade when its trigger fired (the mobile "double
+     loading"). Width-change rebuilds create the cast already visible
+     (__castShown) instead of re-arming triggers. */
   if(road.cast){
+    window.__castShown = true;
     road.cast.forEach(function(c, i){
       gsap.fromTo(c.el, {autoAlpha:0, y:54},
         {autoAlpha:1, y:0, duration:0.9, ease:'expo.out',
@@ -2353,13 +2382,9 @@ if(!REDUCED){
     });
   }
 
-  gsap.delayedCall(1.6, function(){
-    if(!road.cast) return;
-    road.cast.forEach(function(c){
-      if(parseFloat(getComputedStyle(c.el).opacity) < 0.05)
-        gsap.to(c.el, {autoAlpha:1, duration:0.4});
-    });
-  });
+  /* (the old 1.6s reveal-all failsafe lived here — removed: it raced the
+     scroll reveals and made characters blink. forceCastVisible() covers the
+     no-animation-engine case from inside buildRoad.) */
 
   /* the goose family: waddle + step-bounce, a pause mid-field,
      and the adults stretch their wings now and then */
@@ -2885,6 +2910,16 @@ document.querySelectorAll('[data-beta]').forEach(function(b){
     location.href = 'mailto:hello@spur.surf?subject=' + encodeURIComponent('Spur beta (Toronto)');
   });
 });
+
+/* ---------- every card gets a close button ---------- */
+document.querySelectorAll('section[data-sec] .panel').forEach(function(p){
+  var x = document.createElement('button');
+  x.className = 'panel-x';
+  x.setAttribute('aria-label', 'Close this card');
+  x.innerHTML = '&times;';
+  x.addEventListener('click', function(e){ e.stopPropagation(); p.style.display = 'none'; });
+  p.appendChild(x);
+});
 var howBtn = document.querySelector('#problem .btn.t');
 if(howBtn) howBtn.addEventListener('click', function(){
   var t = document.getElementById('venues');
@@ -2911,8 +2946,21 @@ function sbFetch(path, body){
     body: JSON.stringify(body)
   }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); });
 }
+var MS_KEY = 'spur_ms_session';
+/* Open the web app; when we hold a live session, hand it over in the URL
+   hash so the person is NOT asked to log in again on app.spur.surf. */
+function openApp(){
+  var s = window.__session;
+  if(s && s.access_token && s.refresh_token){
+    location.href = 'https://app.spur.surf/#access_token=' + encodeURIComponent(s.access_token) +
+                    '&refresh_token=' + encodeURIComponent(s.refresh_token);
+  } else {
+    location.href = 'https://app.spur.surf';
+  }
+}
 function loggedOut(){
   window.__session = null;
+  try { localStorage.removeItem(MS_KEY); } catch(e){}
   var link = document.getElementById('loginLink');
   link.textContent = 'Log in';
   var m = document.getElementById('acctMenu');
@@ -2934,7 +2982,7 @@ function showAcctMenu(){
     b.onclick = fn;
     m.appendChild(b);
   }
-  item('Open the app ›', function(){ location.href = 'https://app.spur.surf'; });
+  item('Open the app ›', openApp);
   item('Log out', function(){
     var s = window.__session;
     if(s && s.access_token){
@@ -2946,6 +2994,15 @@ function showAcctMenu(){
 }
 function loggedIn(session){
   window.__session = session;
+  /* survive refreshes: keep the session (with its expiry) client-side */
+  try {
+    localStorage.setItem(MS_KEY, JSON.stringify({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token || null,
+      expires_at: session.expires_at || (Math.floor(Date.now()/1000) + (session.expires_in || 3600)),
+      user: session.user || null
+    }));
+  } catch(e){}
   var link = document.getElementById('loginLink');
   var who = (session.user && (session.user.email || session.user.phone)) || 'Logged in';
   link.textContent = String(who).split('@')[0];
