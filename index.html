@@ -1631,7 +1631,7 @@ function buildRoad(){
          then search backwards instead */
       var AT_MAX = 0.93;
       for(var tries = 0; tries < 40 && overlapsTaken({x:x, y:y, w:p.w, h:h}, 18); tries++){
-        at = tries < 20 ? Math.min(AT_MAX, at + 0.012) : Math.max(0.06, at - 0.014);
+        at = (vw >= 640) ? Math.min(0.995, at + 0.012) : (tries < 20 ? Math.min(AT_MAX, at + 0.012) : Math.max(0.06, at - 0.014));
         settle(at);
       }
       var wrap = el('g', {'class':'cast', opacity:window.__castShown ? 1 : 0});
@@ -1650,7 +1650,7 @@ function buildRoad(){
              rejected (that's how the soccer squad ended up on the download
              button's small print) — collision-check the FINAL position too */
           for(var t2 = 0; t2 < 40 && overlapsTaken({x:x, y:y, w:p.w, h:h}, 18); t2++){
-            at = t2 < 20 ? Math.min(AT_MAX, at + 0.012) : Math.max(0.06, at - 0.014);
+            at = (vw >= 640) ? Math.min(0.995, at + 0.012) : (t2 < 20 ? Math.min(AT_MAX, at + 0.012) : Math.max(0.06, at - 0.014));
             settle(at);
             y = Math.max(pt.y + h * 0.20 - (cb.y + cb.height) * sc, 24);
           }
