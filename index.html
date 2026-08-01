@@ -2148,8 +2148,16 @@ function buildRoad(){
     };
     road.cast.forEach(function(c){
       var t = STAG[c.k]; if(!t) return;
-      var scx = Math.min(Math.max(c.x + c.w * t[2], t[1]/2 + 16), vw - t[1]/2 - 16);
-      var scy = Math.max(c.y + c.h * t[3], 40);
+      /* phones: the ribbon fills the screen, so the side offsets tuned for
+         desktop land the pills ON the characters — go centered-above instead */
+      var scx, scy;
+      if(vw < 640){
+        scx = Math.min(Math.max(c.x + c.w / 2, t[1]/2 + 16), vw - t[1]/2 - 16);
+        scy = Math.max(c.y - 18, 40);
+      } else {
+        scx = Math.min(Math.max(c.x + c.w * t[2], t[1]/2 + 16), vw - t[1]/2 - 16);
+        scy = Math.max(c.y + c.h * t[3], 40);
+      }
       var stg = el('g',{transform:'translate(' + scx.toFixed(1) + ',' + scy.toFixed(1) + ')'});
       stg.appendChild(el('rect',{x:-t[1]/2, y:-13, width:t[1], height:26, rx:13, fill:C.ink}));
       var stx = el('text',{x:0, y:4, 'text-anchor':'middle', fill:C.cream});
@@ -3189,7 +3197,10 @@ function showAcctMenu(){
   });
   document.body.appendChild(m);
 }
-function loggedIn(session){
+/* fresh = the person just actively logged in (vs. a restored session).
+   A fresh login goes STRAIGHT into the app, already authenticated — the
+   token rides along in the URL hash so there is no second login. */
+function loggedIn(session, fresh){
   window.__session = session;
   /* survive refreshes: keep the session (with its expiry) client-side */
   try {
@@ -3204,10 +3215,14 @@ function loggedIn(session){
   var who = (session.user && (session.user.email || session.user.phone)) || 'Logged in';
   if(link) link.textContent = String(who).split('@')[0];
   modal.hidden = true;
-  /* they logged in to see a specific post — show them that post */
+  /* they logged in to see a specific post — show them that post;
+     otherwise a fresh login continues straight into the app */
   if(window.__pendingEv && window.__openEvent){
     window.__openEvent(window.__pendingEv);
     window.__pendingEv = null;
+  } else if(fresh){
+    openApp();
+    return;
   }
   /* Same ecosystem as the app: exchange the Supabase token with the Spur
      backend, which knows the profile — greet by first name, not phone. */
@@ -3255,7 +3270,7 @@ document.getElementById('lmVerify').addEventListener('click', function(){
   var code = document.getElementById('lmCode').value.trim();
   if(!sbReady()){ note('Demo mode — verification activates once the Supabase keys are in.'); return; }
   sbFetch('verify', {type:'sms', phone: ph, token: code}).then(function(r){
-    if(r.ok && r.j.access_token) loggedIn(r.j); else note(r.j.msg || 'That code didn’t work.');
+    if(r.ok && r.j.access_token) loggedIn(r.j, true); else note(r.j.msg || 'That code didn’t work.');
   });
 });
 /* classic email: existing members log in, new people sign up on the spot */
@@ -3270,7 +3285,7 @@ document.getElementById('lmLogin').addEventListener('click', function(){
   var cr = emailCreds(); if(!cr) return;
   if(!sbReady()){ note('Demo mode — email login activates once the Supabase keys are in.'); return; }
   sbFetch('token?grant_type=password', cr).then(function(r){
-    if(r.ok && r.j.access_token) loggedIn(r.j);
+    if(r.ok && r.j.access_token) loggedIn(r.j, true);
     else note(r.j.error_description || r.j.msg || 'That email and password didn’t match.');
   });
 });
@@ -3279,21 +3294,45 @@ document.getElementById('lmSignup').addEventListener('click', function(){
   if(cr.password.length < 8){ note('Pick a password with at least 8 characters.'); return; }
   if(!sbReady()){ note('Demo mode — sign-up activates once the Supabase keys are in.'); return; }
   sbFetch('signup', cr).then(function(r){
-    if(r.ok && r.j.access_token) loggedIn(r.j);
+    if(r.ok && r.j.access_token) loggedIn(r.j, true);
     else if(r.ok) note('Almost there — confirm your email from your inbox, then log in here.');
     else note(r.j.msg || r.j.error_description || 'Could not create the account — try another email.');
   });
 });
-/* returning from Google OAuth: Supabase puts tokens in the URL hash */
+/* returning from Google OAuth: Supabase puts tokens in the URL hash.
+   Keep the refresh token — without it the app hand-off can't hold the
+   session and Google users were asked to log in a second time. */
 if(location.hash.indexOf('access_token=') !== -1){
   var hp = {};
   location.hash.slice(1).split('&').forEach(function(kv){
     var p = kv.split('='); hp[p[0]] = decodeURIComponent(p[1] || '');
   });
   if(hp.access_token){
-    loggedIn({access_token: hp.access_token, user:{email: hp.email || ''}});
     history.replaceState(null, '', location.pathname + location.search);
+    loggedIn({access_token: hp.access_token, refresh_token: hp.refresh_token || null,
+              expires_in: hp.expires_in ? +hp.expires_in : 3600,
+              user:{email: hp.email || ''}}, true);
   }
+}
+
+/* every OTHER visit: restore the saved session so nobody has to log in
+   twice — back-navigation, refreshes and return visits stay signed in */
+if(!window.__session){
+  try {
+    var savedS = JSON.parse(localStorage.getItem(MS_KEY) || 'null');
+    if(savedS && savedS.access_token){
+      var nowS = Math.floor(Date.now()/1000);
+      if(!savedS.expires_at || savedS.expires_at > nowS + 60){
+        loggedIn(savedS);
+      } else if(savedS.refresh_token && sbReady()){
+        sbFetch('token?grant_type=refresh_token', {refresh_token: savedS.refresh_token}).then(function(r){
+          if(r.ok && r.j.access_token) loggedIn(r.j); else loggedOut();
+        });
+      } else {
+        loggedOut();
+      }
+    }
+  } catch(e){}
 }
 
 })();
