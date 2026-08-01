@@ -2073,6 +2073,7 @@ function buildRoad(){
       var centerY = np * (docH - vhNow) + vhNow * 0.5;
       for(var k = 0; k < 3; k++){
         var lab = LAB[ni*3 + k];
+        if(!lab) continue;   /* deleted pill */
         /* keep the label pills OFF the characters: slide further down the
            line until the pill's rectangle is clear of every placed scene */
         var tryY = centerY + (k - 1) * 250, pt, tgx;
