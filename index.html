@@ -122,7 +122,10 @@
   @media(max-width:900px){ .links{display:none} }
   @media(max-width:620px){
     .cap.y{display:none}
-    nav:not(.in-hero){width:calc(100vw - 156px);left:6px;transform:none}
+    nav:not(.in-hero){width:calc(100vw - 126px);left:6px;transform:none}
+    #caps{right:8px;top:22px}
+    .cap{padding:9px 13px;font-size:12px}
+    section.on-path .inner{margin-top:58vh}
   }
 
   /* ---------- explore page ---------- */
@@ -2990,6 +2993,7 @@ document.querySelectorAll('.links a[data-when]').forEach(function(a){
 document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !exEl.hidden) exClose(); });
 
 /* ---------- section CTAs ---------- */
+if(window.matchMedia('(max-width: 640px)').matches){ document.querySelectorAll('.cap.o').forEach(function(b){ b.textContent = 'Go to app'; }); }
 document.querySelectorAll('[data-beta]').forEach(function(b){
   b.addEventListener('click', function(){
     location.href = 'mailto:hello@spur.surf?subject=' + encodeURIComponent('Spur beta (Toronto)');
