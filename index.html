@@ -1565,9 +1565,9 @@ function buildRoad(){
     var PLAN = [
       {k:'cycling',    at:0.22, w:600},
       {k:'drinks',     at:0.29, w:600},
-      {k:'bocce',      at:0.44, w:560},
+      {k:'basketball', at:0.44, w:580},
       {k:'barbecue',   at:0.58, w:640},
-      {k:'basketball', at:0.72, w:580},
+      {k:'bocce',      at:0.72, w:560},
       {k:'frisbee',    at:0.82, w:560},
       {k:'soccer',     at:0.86, w:560}
     ];
@@ -1594,6 +1594,7 @@ function buildRoad(){
       return false;
     }
     road.overlapsTaken = overlapsTaken;   /* night pills consult this too */
+    road.castSvg = csvg;                  /* pills render above the cast */
     PLAN.forEach(function(p, i){
       var inner = SCENES[p.k];
       if(!inner) return;
@@ -1656,6 +1657,10 @@ function buildRoad(){
           g2.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + sc.toFixed(4) + ')');
         }
       } catch(e){}
+      /* the cyclists lean into the slope so they ride ALONG the line */
+      if(p.k === 'cycling'){
+        g2.setAttribute('transform', g2.getAttribute('transform') + ' rotate(27 640 416)');
+      }
       road.claim(x, y, p.w, h);
       takenRects.push({x:x, y:y, w:p.w, h:h});
       road.cast.push({el:wrap, k:p.k, figs:[].slice.call(g2.querySelectorAll('g.fig')),
@@ -2081,7 +2086,7 @@ function buildRoad(){
         tx2.textContent = lab[0];
         tx2.style.font = '700 9.5px "Space Mono", monospace'; tx2.style.letterSpacing = '1px';
         tg.appendChild(tx2);
-        svg.appendChild(tg);
+        (road.castSvg || svg).appendChild(tg);
         road.nightTags.push(tg);
       }
     });
