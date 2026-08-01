@@ -1,9 +1,22 @@
-<!DOCTYPE html>
+// Regenerates the legal pages with the spur.surf site chrome, and builds
+// contact.html. Legal obligations text stays verbatim; only the operator
+// entity (now Spur Social Corp.), contact email (hello@spur.surf), and the
+// last-updated date change. Run: node gen-legal.js
+const fs = require("fs");
+
+const PAGES = [
+  { file: "privacy.html", title: "Privacy policy" },
+  { file: "terms.html", title: "Terms of service" },
+  { file: "community-guidelines.html", title: "Community guidelines" },
+  { file: "disclaimer.html", title: "Disclaimer" },
+];
+
+const chrome = (title, inner) => `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Disclaimer · Spur</title>
+<title>${title} · Spur</title>
 <link rel="icon" type="image/png" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,32 +56,10 @@
 <body>
 <div class="top">
   <a class="brand" href="/"><i></i>Spur</a>
-  <span class="crumb">/ disclaimer</span>
+  <span class="crumb">/ ${title.toLowerCase()}</span>
 </div>
 <main><div class="card">
-<h1>Spur — Community Safety Disclaimer</h1>
-<p><strong>Effective date:</strong> July 4, 2026</p>
-<p>Spur helps people meet in real life to do activities together. Please read this carefully — by using Spur you acknowledge and agree to the following.</p>
-<h2>Spur is an introduction platform, not a chaperone</h2>
-<p>Spur <strong>only helps people find and organize plans.</strong> We do not host, run, supervise, vet, or control events, and we are not present at them. We do not perform background checks on users. Verification features (phone, optional ID) reduce but do <strong>not eliminate</strong> risk, and do not guarantee anyone's identity, intentions, or safety.</p>
-<h2>You meet people at your own risk</h2>
-<p>Meeting people you don't know — and participating in activities — carries <strong>inherent risks</strong>, including injury, illness, theft, harassment, or other harm. <strong>You participate voluntarily and assume these risks yourself.</strong> Spur is not responsible for the actions of any user, host, venue, or other third party.</p>
-<h2>Please protect yourself</h2>
-<p>We strongly encourage you to:
-- Meet in <strong>public places</strong>, especially the first time.
-- Tell a friend where you're going and who you're meeting.
-- Trust your instincts and leave if something feels wrong.
-- Not share sensitive personal or financial information with people you've just met.
-- Drink responsibly and arrange safe transport.
-- Use the <strong>Block</strong> and <strong>Report</strong> tools if anyone makes you uncomfortable — we review reports and act on them.</p>
-<h2>Alcohol and venues</h2>
-<p>Some plans happen at bars or venues that serve alcohol. Spur does not serve alcohol and is not responsible for venues, their staff, their premises, or anything served or done there. You are responsible for complying with the law and drinking responsibly.</p>
-<h2>Emergencies</h2>
-<p><strong>Spur is not an emergency service.</strong> If you are in danger or witness a crime, contact local emergency services (in Canada, call 911) immediately.</p>
-<h2>Reporting and enforcement</h2>
-<p>We take safety seriously. You can report users or content in-app, and we aim to review reports promptly (within 24 hours for serious safety issues). We may remove content and permanently ban users who put others at risk.</p>
-<h2>Acknowledgement</h2>
-<p>By checking the consent box and using Spur, you confirm that you have read and understood this disclaimer, that you are 18 or older, and that you accept the risks of meeting people in person and participating in activities arranged through the Service.</p>
+${inner}
 </div></main>
 <footer>
   <div class="fin">
@@ -92,3 +83,38 @@
 </footer>
 </body>
 </html>
+`;
+
+for (const p of PAGES) {
+  let html = fs.readFileSync(p.file, "utf8");
+  const start = html.indexOf("<h1");
+  const end = html.indexOf("<footer");
+  if (start === -1 || end === -1) {
+    console.error(`SKIP ${p.file}: pattern not found`);
+    continue;
+  }
+  let inner = html.slice(start, end).trim();
+  inner = inner
+    .replace(/Shahrad Shamasebloo \(sole proprietor, operating as [“"]Spur[”"]\)/g, "Spur Social Corp., a Canadian federal corporation")
+    .replace(/Shahrad Shamasebloo \(operating as [“"]?Spur[”"]?\)/g, "Spur Social Corp.")
+    .replace(/Shahrad Shamasebloo/g, "Spur Social Corp.")
+    .replace(/shahrads@gmail\.com/g, "hello@spur.surf")
+    .replace(/<strong>Last updated:<\/strong> July \d+, 2026/g, "<strong>Last updated:</strong> August 1, 2026");
+  fs.writeFileSync(p.file, chrome(p.title, inner));
+  console.log(`rebuilt ${p.file} (${inner.length} chars of content)`);
+}
+
+const contactInner = `<h1>Get in touch</h1>
+<p>Spur is built in Toronto by <strong>Spur Social Corp.</strong> Whatever it's about, a real person reads it.</p>
+<h2>Join the iOS beta</h2>
+<p>Spur is in a closed beta, Toronto-first. Want in? Email <a href="mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)">hello@spur.surf</a> and say hi — or just <a href="https://app.spur.surf">open Spur in your browser</a> right now.</p>
+<h2>Put your venue on Spur</h2>
+<p>Bars, courts, studios, karting tracks — if people can meet up there, we want you on the map. Email <a href="mailto:hello@spur.surf?subject=Venue%20partnership">hello@spur.surf</a> with your venue's name and what you'd like to run.</p>
+<h2>Safety &amp; reports</h2>
+<p>Something happened that shouldn't have? Use the in-app <strong>report</strong> tools (they reach us fastest), or email <a href="mailto:hello@spur.surf?subject=Safety%20report">hello@spur.surf</a>. Reports are reviewed by a human.</p>
+<h2>Privacy requests</h2>
+<p>To access, correct, or delete your personal information (see our <a href="/privacy.html">privacy policy</a>), email <a href="mailto:hello@spur.surf?subject=Privacy%20request">hello@spur.surf</a>. We respond within the timeframes required by law.</p>
+<hr>
+<p><strong>Spur Social Corp.</strong><br>Toronto, Ontario, Canada<br><a href="mailto:hello@spur.surf">hello@spur.surf</a></p>`;
+fs.writeFileSync("contact.html", chrome("Get in touch", contactInner));
+console.log("built contact.html");
