@@ -1569,34 +1569,64 @@ function buildRoad(){
       {k:'frisbee',    at:0.82, w:560},
       {k:'soccer',     at:0.86, w:560}
     ];
+    /* Scenes must not pile onto each other or onto the final section's
+       copy/CTA — on the narrow, tall phone road the fixed fractions land
+       close together in screen space (cyclists jumbled into the drinks
+       crew, the soccer squad sitting on the download button). Each scene
+       checks the spots already taken and slides further down the road
+       until it has clear space. */
+    var takenRects = [];
+    (function(){
+      var fin = document.querySelector('#go .final');
+      if(fin){
+        var r = fin.getBoundingClientRect();
+        takenRects.push({x:r.left + window.scrollX, y:r.top + window.scrollY, w:r.width, h:r.height});
+      }
+    })();
+    function overlapsTaken(r, pad){
+      for(var t = 0; t < takenRects.length; t++){
+        var q = takenRects[t];
+        if(!(r.x + r.w < q.x - pad || q.x + q.w < r.x - pad ||
+             r.y + r.h < q.y - pad || q.y + q.h < r.y - pad)) return true;
+      }
+      return false;
+    }
     PLAN.forEach(function(p, i){
       var inner = SCENES[p.k];
       if(!inner) return;
       var vbp = (SCENE_VB[p.k] || '0 0 1280 832').split(/\s+/);
       var VW0 = +vbp[2], VH0 = +vbp[3];
-      var pt = road.fill.getPointAtLength(road.len * p.at);
       /* never wider than the viewport allows — on a phone the desktop
          widths (560-640) would run right off both edges */
       p = {k:p.k, at:p.at, w:Math.min(p.w, vw * 0.78)};
       var sc = p.w / VW0, h = VH0 * sc;
-      var x  = Math.min(Math.max(pt.x - p.w/2, 14), Math.max(14, vw - p.w - 14));
-      /* if the clamp pushed the group away from the road's own x, walk along
-         the path to the point that actually sits above the group's centre —
-         otherwise pt.y belongs to a stretch of road that is off screen and
-         the scene floats well above the band */
-      var cxWant = x + p.w / 2;
-      if(Math.abs(pt.x - cxWant) > 8){
-        var best = pt, bd = Math.abs(pt.x - cxWant);
-        for(var q = -0.10; q <= 0.10; q += 0.004){
-          var f2 = p.at + q; if(f2 < 0 || f2 > 1) continue;
-          var s2 = road.fill.getPointAtLength(road.len * f2);
-          var d2 = Math.abs(s2.x - cxWant);
-          if(d2 < bd){ bd = d2; best = s2; }
+      var at = p.at, pt, x, y;
+      function settle(f){
+        pt = road.fill.getPointAtLength(road.len * f);
+        x  = Math.min(Math.max(pt.x - p.w/2, 14), Math.max(14, vw - p.w - 14));
+        /* if the clamp pushed the group away from the road's own x, walk along
+           the path to the point that actually sits above the group's centre —
+           otherwise pt.y belongs to a stretch of road that is off screen and
+           the scene floats well above the band */
+        var cxWant = x + p.w / 2;
+        if(Math.abs(pt.x - cxWant) > 8){
+          var best = pt, bd = Math.abs(pt.x - cxWant);
+          for(var q = -0.10; q <= 0.10; q += 0.004){
+            var f2 = f + q; if(f2 < 0 || f2 > 1) continue;
+            var s2 = road.fill.getPointAtLength(road.len * f2);
+            var d2 = Math.abs(s2.x - cxWant);
+            if(d2 < bd){ bd = d2; best = s2; }
+          }
+          pt = best;
         }
-        pt = best;
+        y = Math.max(pt.y - h * 0.86, 24);
       }
-      var y  = Math.max(pt.y - h * 0.86, 24);
-      var wrap = el('g', {'class':'cast', opacity:(REDUCED || window.__castShown) ? 1 : 0});
+      settle(at);
+      for(var tries = 0; tries < 40 && overlapsTaken({x:x, y:y, w:p.w, h:h}, 18); tries++){
+        at = Math.min(0.995, at + 0.012);
+        settle(at);
+      }
+      var wrap = el('g', {'class':'cast', opacity:window.__castShown ? 1 : 0});
       var g2 = el('g', {transform:'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + sc.toFixed(4) + ')'});
       g2.innerHTML = inner;
       wrap.appendChild(g2);
@@ -1608,10 +1638,19 @@ function buildRoad(){
         var cb = g2.getBBox();
         if(cb.height > 0){
           y = Math.max(pt.y + h * 0.20 - (cb.y + cb.height) * sc, 24);
+          /* the re-stand can shift the scene back into a spot we already
+             rejected (that's how the soccer squad ended up on the download
+             button's small print) — collision-check the FINAL position too */
+          for(var t2 = 0; t2 < 40 && overlapsTaken({x:x, y:y, w:p.w, h:h}, 18); t2++){
+            at = Math.min(0.995, at + 0.012);
+            settle(at);
+            y = Math.max(pt.y + h * 0.20 - (cb.y + cb.height) * sc, 24);
+          }
           g2.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + sc.toFixed(4) + ')');
         }
       } catch(e){}
       road.claim(x, y, p.w, h);
+      takenRects.push({x:x, y:y, w:p.w, h:h});
       road.cast.push({el:wrap, k:p.k, figs:[].slice.call(g2.querySelectorAll('g.fig')),
                       x:x, y:y, w:p.w, h:h, i:i});
     });
@@ -1636,7 +1675,7 @@ function buildRoad(){
           var dy = (st % 2 ? 1 : -1) * Math.ceil(st / 2) * 46;
           if(road.rectClear(px - 10, py + dy - 10, pw + 20, ph + 20)){ py += dy; break; }
         }
-        var pwrap = el('g', {'class':'cast', opacity:(REDUCED || window.__castShown) ? 1 : 0});
+        var pwrap = el('g', {'class':'cast', opacity:window.__castShown ? 1 : 0});
         var pg = el('g', {transform:'translate(' + (px - pvb[0] * psc).toFixed(1) + ',' +
                                        (py - pvb[1] * psc).toFixed(1) + ') scale(' + psc.toFixed(4) + ')'});
         pg.innerHTML = SCENES.patties;
@@ -1729,7 +1768,11 @@ function buildRoad(){
         /* on phones the anchor lands on the CTA/meta text — play further
            down the field where the grass is actually empty */
         if(vw < 640){ by += bh * 0.52; }
-        var bwrap = el('g', {'class':'cast', opacity:(REDUCED || window.__castShown) ? 1 : 0});
+        /* and never on top of the final copy or another scene */
+        var bTries = 0;
+        while(bTries++ < 20 && overlapsTaken({x:bx, y:by, w:bw, h:bh}, 18)) by += 60;
+        takenRects.push({x:bx, y:by, w:bw, h:bh});
+        var bwrap = el('g', {'class':'cast', opacity:window.__castShown ? 1 : 0});
         var bg = el('g', {transform:'translate(' + bx.toFixed(1) + ',' + by.toFixed(1) + ') scale(' + bsc.toFixed(4) + ')'});
         bg.innerHTML = SCENES.badminton;
         bwrap.appendChild(bg);
@@ -1774,7 +1817,25 @@ function buildRoad(){
     });
   }
   if(REDUCED){
-    forceCastVisible();
+    /* Reduce Motion still deserves the appear-as-you-scroll moment — just a
+       plain fade with no movement, driven by IntersectionObserver instead of
+       the animation engine. */
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if(!en.isIntersecting) return;
+          var g = en.target;
+          g.style.transition = 'opacity .5s ease';
+          g.setAttribute('opacity', '1');
+          g.style.opacity = '1';
+          g.style.visibility = 'visible';
+          io.unobserve(g);
+        });
+      }, {rootMargin: '0px 0px -4% 0px'});
+      document.querySelectorAll('#castlayer g.cast').forEach(function(g){ io.observe(g); });
+    } else {
+      forceCastVisible();
+    }
   } else {
     /* last-resort only: if the animation engine never armed the reveals
        (blocked CDN, crashed script), show everyone rather than a blank page */
