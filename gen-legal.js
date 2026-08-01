@@ -78,6 +78,8 @@ ${inner}
     </nav>
     <nav aria-label="Contact">
       <div class="flab">Get in touch</div>
+      <a href="/about.html">About Spur</a>
+      <a href="/faq.html">FAQ</a>
       <a href="/contact.html">Contact us</a>
       <a href="https://app.spur.surf">Open the app</a>
     </nav>
@@ -120,3 +122,44 @@ const contactInner = `<h1>Get in touch</h1>
 <p><strong>Spur Social Corp.</strong><br>Toronto, Ontario, Canada<br><a href="mailto:hello@spur.surf">hello@spur.surf</a></p>`;
 fs.writeFileSync("contact.html", chrome("Get in touch", contactInner));
 console.log("built contact.html");
+
+const aboutInner = `<h1>About Spur</h1>
+<p><strong>Spur is the app for spontaneous plans.</strong> Post what you feel like doing — pickup basketball, patio drinks, a sunset paddle — and people nearby join in. Tonight, not "sometime."</p>
+<h2>Why we built it</h2>
+<p>Every group chat has the same graveyard: "we should hang out soon." Six people, forty messages, nobody commits. Spur skips the negotiation — you see plans that already have a time and a place, and you either join or you don't.</p>
+<h2>Built so people actually show up</h2>
+<ul>
+<li><strong>Real people only</strong> — every account is phone-verified. No bots, no burners.</li>
+<li><strong>Reliability is visible</strong> — hosts and joiners build a track record; flaking has a cost.</li>
+<li><strong>Refundable deposits</strong> — hosts can ask for a small deposit that comes right back when you show up.</li>
+<li><strong>Safety first</strong> — block and report tools, photo moderation, and <a href="/community-guidelines.html">community guidelines</a> with teeth.</li>
+</ul>
+<h2>Toronto first</h2>
+<p>We're starting with one city — ours. Christie Pits bocce, High Park badminton, Kensington patios. Once spontaneous hangouts feel effortless here, we'll grow.</p>
+<h2>The company</h2>
+<p>Spur is built by <strong>Spur Social Corp.</strong>, a Canadian federal corporation headquartered in Toronto, Ontario. Want to reach us? <a href="/contact.html">Get in touch</a> — a real person reads it.</p>
+<p><a href="https://app.spur.surf">Open Spur in your browser</a> or join the <a href="mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)">iOS beta</a>.</p>`;
+fs.writeFileSync("about.html", chrome("About", aboutInner));
+console.log("built about.html");
+
+const faqInner = `<h1>Questions, answered</h1>
+<h2>What is Spur?</h2>
+<p>An app for spontaneous, in-person plans in Toronto. Someone posts "volleyball at Woodbine, 6pm" — people nearby tap in — everyone shows up and plays. That's the whole product.</p>
+<h2>Is it free?</h2>
+<p>Yes. Joining Spur and most events costs nothing. Some events carry a small <strong>refundable deposit</strong> — show up and it comes straight back. Ghost, and it doesn't. That's why plans on Spur actually happen.</p>
+<h2>Who can join?</h2>
+<p>Anyone <strong>18 or older</strong> with a real mobile number. Every account is phone-verified — no bots, no burner accounts, no anonymous browsing.</p>
+<h2>How do I get the app?</h2>
+<p>Spur is in a closed iOS beta (TestFlight), Toronto-first. Email <a href="mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)">hello@spur.surf</a> for an invite — or use the full app in your browser right now at <a href="https://app.spur.surf">app.spur.surf</a>.</p>
+<h2>Is my location shared?</h2>
+<p>Never exactly. Your location is blurred to roughly one kilometre <em>before</em> it's stored, so other people only ever see your rough area. Details in the <a href="/privacy.html">privacy policy</a>.</p>
+<h2>How do deposits work?</h2>
+<p>Card details are handled entirely by Stripe — we never see your card number. Attend the event (or cancel with more than 24 hours' notice) and the deposit is refunded in full. No-show or cancel late, and the deposit goes to the host, minus a small platform fee.</p>
+<h2>Someone made me uncomfortable. What do I do?</h2>
+<p>Use <strong>Block</strong> and <strong>Report</strong> in the app — reports are reviewed by a human and acted on. If you're in danger, call local emergency services (911 in Canada) first. More in our <a href="/safety-guidelines.html">safety guidelines</a>.</p>
+<h2>Can I put my venue on Spur?</h2>
+<p>Yes — bars, courts, studios, tracks. Email <a href="mailto:hello@spur.surf?subject=Venue%20partnership">hello@spur.surf</a> with your venue's name and what you'd like to run.</p>
+<h2>How do I delete my account?</h2>
+<p>In the app: Settings → delete account. Your profile and personal content are removed, as described in the <a href="/privacy.html">privacy policy</a>.</p>`;
+fs.writeFileSync("faq.html", chrome("FAQ", faqInner));
+console.log("built faq.html");
