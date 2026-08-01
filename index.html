@@ -2057,7 +2057,7 @@ function buildRoad(){
   (function(){
     var vhNow = window.innerHeight || 900;
     var LAB = [
-      ['\u263e NIGHT RIDE \u00b7 8:30',150],['\u263e PATIO DRINKS \u00b7 9:00',166],['\u263e KARAOKE \u00b7 10:30',144],
+      ['MORNING RIDE WITH BESTIE · 6:30 AM',258],['\u263e PATIO DRINKS \u00b7 9:00',166],null,
       ['\u263e LATE BOCCE \u00b7 9:15',152],['\u263e ROOFTOP HANG \u00b7 10:00',180],['\u263e NIGHT MARKET \u00b7 11:00',186]
     ];
     function lenAtY(targetY){
@@ -2084,7 +2084,7 @@ function buildRoad(){
              !road.overlapsTaken({x:tgx - lab[1]/2, y:pt.y - 52, w:lab[1], h:46}, 10)) break;
           tryY += 140;
         }
-        var tg = el('g',{transform:'translate(' + tgx.toFixed(1) + ',' + (pt.y - (lab[0].indexOf('PATIO') !== -1 ? 255 : 36)).toFixed(1) + ')', opacity:0});
+        var tg = el('g',{transform:'translate(' + tgx.toFixed(1) + ',' + (pt.y - ((lab[0].indexOf('PATIO') !== -1 || lab[0].indexOf('BESTIE') !== -1) ? 255 : 36)).toFixed(1) + ')', opacity:0});
         tg.appendChild(el('circle',{cx:(pt.x - tgx).toFixed(1), cy:36, r:4.5, fill:C.ink}));
         tg.appendChild(el('rect',{x:-lab[1]/2, y:-13, width:lab[1], height:26, rx:13, fill:C.ink}));
         var tx2 = el('text',{x:0, y:4, 'text-anchor':'middle', fill:C.cream});
