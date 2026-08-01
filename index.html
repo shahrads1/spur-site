@@ -2044,7 +2044,9 @@ function buildRoad(){
       var cW0 = +cvb2[2], cH0 = +cvb2[3];
       var cw2 = vw < 640 ? vw * 0.72 : Math.min(620, vw * 0.42);
       var csc3 = cw2 / cW0, ch2 = cH0 * csc3;
-      var L0 = Math.min(road.llen * 0.05, 480);
+      var vhN = window.innerHeight || 900;
+      var L0 = road.llen * 0.05;
+      for(var Ls = 0; Ls <= road.llen; Ls += 50){ if(road.line.getPointAtLength(Ls).y >= vhN * 1.72){ L0 = Ls; break; } }
       var pOn2 = road.line.getPointAtLength(L0);
       var pA3 = road.line.getPointAtLength(Math.max(0, L0 - 70));
       var pB3 = road.line.getPointAtLength(Math.min(road.llen, L0 + 70));
