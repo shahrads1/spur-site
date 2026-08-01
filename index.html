@@ -117,14 +117,11 @@
     transition:transform .14s;
   }
   .cap:hover{transform:translateY(-1px)}
+  /* ONE capsule: yellow "Log in" straight into the app
+     (phones relabel it "Go to app") */
   .cap.y{background:#FFD23F;color:var(--ink)}
-  /* desktop: one capsule only — the app lives under Log in (account menu).
-     Phones keep their "Go to app" capsule. */
-  .cap.o{background:var(--paper);color:var(--coral);display:none}
   @media(max-width:900px){ .links{display:none} }
   @media(max-width:620px){
-    .cap.y{display:none}
-    .cap.o{display:block}
     nav:not(.in-hero){width:calc(100vw - 126px);left:6px;transform:none}
     #caps{right:8px;top:22px}
     .cap{padding:9px 13px;font-size:12px}
@@ -538,8 +535,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
   </div>
 </nav>
 <div id="caps">
-  <button class="cap y" id="loginLink">Log in</button>
-  <button class="cap o" onclick="openApp()">Open the app</button>
+  <button class="cap y" onclick="openApp()">Log in</button>
 </div>
 
 <!-- EXPLORE — the app's explore page, open access on the web, demo data -->
@@ -3057,7 +3053,7 @@ document.querySelectorAll('.links a[data-when]').forEach(function(a){
 document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !exEl.hidden) exClose(); });
 
 /* ---------- section CTAs ---------- */
-if(window.matchMedia('(max-width: 640px)').matches){ document.querySelectorAll('.cap.o').forEach(function(b){ b.textContent = 'Go to app'; }); }
+if(window.matchMedia('(max-width: 640px)').matches){ document.querySelectorAll('#caps .cap').forEach(function(b){ b.textContent = 'Go to app'; }); }
 document.querySelectorAll('[data-beta]').forEach(function(b){
   b.addEventListener('click', function(){
     location.href = 'mailto:hello@spur.surf?subject=' + encodeURIComponent('Spur beta (Toronto)');
@@ -3129,7 +3125,7 @@ function loggedOut(){
   window.__session = null;
   try { localStorage.removeItem(MS_KEY); } catch(e){}
   var link = document.getElementById('loginLink');
-  link.textContent = 'Log in';
+  if(link) link.textContent = 'Log in';
   var m = document.getElementById('acctMenu');
   if(m) m.remove();
 }
@@ -3172,7 +3168,7 @@ function loggedIn(session){
   } catch(e){}
   var link = document.getElementById('loginLink');
   var who = (session.user && (session.user.email || session.user.phone)) || 'Logged in';
-  link.textContent = String(who).split('@')[0];
+  if(link) link.textContent = String(who).split('@')[0];
   modal.hidden = true;
   /* Same ecosystem as the app: exchange the Supabase token with the Spur
      backend, which knows the profile — greet by first name, not phone. */
@@ -3182,11 +3178,14 @@ function loggedIn(session){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({access_token: session.access_token})
     }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
-      if(j && j.user && j.user.firstName) link.textContent = 'Hi ' + j.user.firstName;
+      if(j && j.user && j.user.firstName && link) link.textContent = 'Hi ' + j.user.firstName;
     }).catch(function(){});
   }
 }
-document.getElementById('loginLink').addEventListener('click', function(){
+/* the header capsule now goes straight to the app; the modal machinery
+   stays wired for any page element with id="loginLink" (none today) */
+var loginLinkEl = document.getElementById('loginLink');
+if(loginLinkEl) loginLinkEl.addEventListener('click', function(){
   if(window.__session){ showAcctMenu(); } else { modal.hidden = false; }
 });
 modal.addEventListener('click', function(e){ if(e.target === modal) modal.hidden = true; });
