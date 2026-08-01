@@ -2862,9 +2862,21 @@ function sbFetch(path, body){
 }
 function loggedIn(session){
   window.__session = session;
+  var link = document.getElementById('loginLink');
   var who = (session.user && (session.user.email || session.user.phone)) || 'Logged in';
-  document.getElementById('loginLink').textContent = String(who).split('@')[0];
+  link.textContent = String(who).split('@')[0];
   modal.hidden = true;
+  /* Same ecosystem as the app: exchange the Supabase token with the Spur
+     backend, which knows the profile — greet by first name, not phone. */
+  if(session.access_token){
+    fetch('https://spur-production-b5d2.up.railway.app/api/auth/supabase', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({access_token: session.access_token})
+    }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      if(j && j.user && j.user.firstName) link.textContent = 'Hi ' + j.user.firstName;
+    }).catch(function(){});
+  }
 }
 document.getElementById('loginLink').addEventListener('click', function(){ modal.hidden = false; });
 modal.addEventListener('click', function(e){ if(e.target === modal) modal.hidden = true; });
