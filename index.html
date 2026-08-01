@@ -1566,7 +1566,6 @@ function buildRoad(){
     var csvg = el('svg',{viewBox:'0 0 ' + vw + ' ' + docH, preserveAspectRatio:'none'});
     host.appendChild(csvg);
     var PLAN = [
-      {k:'cycling',    at:0.22, w:600},
       {k:'drinks',     at:0.29, w:600},
       {k:'basketball', at:0.44, w:580},
       {k:'barbecue',   at:0.58, w:640},
@@ -1597,7 +1596,8 @@ function buildRoad(){
       return false;
     }
     road.overlapsTaken = overlapsTaken;   /* night pills consult this too */
-    road.castSvg = csvg;                  /* pills render above the cast */
+    road.castSvg = csvg;
+    road.takenRects = takenRects;                  /* pills render above the cast */
     PLAN.forEach(function(p, i){
       var inner = SCENES[p.k];
       if(!inner) return;
@@ -1661,28 +1661,6 @@ function buildRoad(){
           g2.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + sc.toFixed(4) + ')');
         }
       } catch(e){}
-      /* the cyclists ride ON the black line: find the line point nearest the
-         scene, read the line's real slope there, rotate to match and drop
-         the wheels onto it — no guessed angles */
-      if(p.k === 'cycling' && road.line){
-        try {
-          var cxm = x + p.w/2, cym = y + h*0.7, bestL = 0, bestD = 1e18;
-          for(var L3 = 0; L3 <= road.llen; L3 += 40){
-            var q3 = road.line.getPointAtLength(L3);
-            var d3 = (q3.x-cxm)*(q3.x-cxm) + (q3.y-cym)*(q3.y-cym);
-            if(d3 < bestD){ bestD = d3; bestL = L3; }
-          }
-          var pA = road.line.getPointAtLength(Math.max(0, bestL - 60));
-          var pB = road.line.getPointAtLength(Math.min(road.llen, bestL + 60));
-          var ang = Math.atan2(pB.y - pA.y, pB.x - pA.x) * 180 / Math.PI;
-          if(ang > 90) ang -= 180; if(ang < -90) ang += 180;   /* keep them upright */
-          var pOn = road.line.getPointAtLength(bestL);
-          var dy2 = pOn.y - (y + h * 0.94);   /* wheel-bottoms onto the line */
-          y = y + dy2;
-          g2.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) +
-            ') scale(' + sc.toFixed(4) + ') rotate(' + ang.toFixed(1) + ' 640 416)');
-        } catch(e){}
-      }
       road.claim(x, y, p.w, h);
       takenRects.push({x:x, y:y, w:p.w, h:h});
       road.cast.push({el:wrap, k:p.k, figs:[].slice.call(g2.querySelectorAll('g.fig')),
@@ -2058,6 +2036,33 @@ function buildRoad(){
   svg.appendChild(road.dot);
   road.svg = svg;
   road.llen = road.line.getTotalLength();
+  /* THE BIKE GIRLS — their own entity at the START of the black line, wheels
+     ON the line; position and angle come from the line's real geometry. */
+  if(typeof SCENES !== 'undefined' && SCENES.cycling && road.line && road.castSvg){
+    try {
+      var cvb2 = (SCENE_VB.cycling || '0 0 1280 832').split(/\s+/);
+      var cW0 = +cvb2[2], cH0 = +cvb2[3];
+      var cw2 = vw < 640 ? vw * 0.72 : Math.min(620, vw * 0.42);
+      var csc3 = cw2 / cW0, ch2 = cH0 * csc3;
+      var L0 = Math.min(road.llen * 0.05, 480);
+      var pOn2 = road.line.getPointAtLength(L0);
+      var pA3 = road.line.getPointAtLength(Math.max(0, L0 - 70));
+      var pB3 = road.line.getPointAtLength(Math.min(road.llen, L0 + 70));
+      var ang3 = Math.atan2(pB3.y - pA3.y, pB3.x - pA3.x) * 180 / Math.PI;
+      if(ang3 > 90) ang3 -= 180; if(ang3 < -90) ang3 += 180;
+      var bx2 = Math.min(Math.max(pOn2.x - cw2 * 0.3, 10), Math.max(10, vw - cw2 - 10));
+      var by2 = pOn2.y - ch2 * 0.94;
+      var cwrap2 = el('g', {'class':'cast', opacity:window.__castShown ? 1 : 0});
+      var cg2 = el('g', {transform:'translate(' + bx2.toFixed(1) + ',' + by2.toFixed(1) + ') scale(' + csc3.toFixed(4) + ') rotate(' + ang3.toFixed(1) + ' ' + (cW0/2) + ' ' + (cH0/2) + ')'});
+      cg2.innerHTML = SCENES.cycling;
+      cwrap2.appendChild(cg2);
+      road.castSvg.appendChild(cwrap2);
+      road.claim(bx2, by2, cw2, ch2);
+      if(road.takenRects) road.takenRects.push({x:bx2, y:by2, w:cw2, h:ch2});
+      road.cast.push({el:cwrap2, k:'cycling', figs:[].slice.call(cg2.querySelectorAll('g.fig')), x:bx2, y:by2, w:cw2, h:ch2, i:road.cast.length});
+    } catch(e){}
+  }
+
 
   var N = 400, samples = [];
   for(var i = 0; i <= N; i++){
