@@ -243,7 +243,7 @@
   /* ---------- sections ---------- */
   section{
     position:relative;
-    min-height:130vh;
+    min-height:150vh;
     display:flex;align-items:center;
     padding:110px 22px;
     overflow:visible;
@@ -258,9 +258,9 @@
   section.on-path .final p{opacity:1;color:var(--ink)}
   section.on-path .meta{opacity:.85;color:var(--cream)}
   @media(max-width:640px){
-    /* taller sections on phones: the road needs slack so the white cards
-       can find clear cream beside it instead of sitting on the band */
-    section{min-height:118vh;padding:90px 16px}
+    /* taller sections on phones: room for every scene, card and pill to
+       have its own ground */
+    section{min-height:155vh;padding:90px 16px}
   }
   .inner{
     position:relative;z-index:5;
@@ -533,7 +533,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
 </nav>
 <div id="caps">
   <button class="cap y" id="loginLink">Log in</button>
-  <button class="cap o" onclick="location.href='https://app.spur.surf'">Open the app</button>
+  <button class="cap o" onclick="openApp()">Open the app</button>
 </div>
 
 <!-- EXPLORE — the app's explore page, open access on the web, demo data -->
@@ -709,7 +709,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
     <div class="final" data-reveal>
       <h2>Ready when you are.</h2>
       <p>Pick something happening tonight and go. Worst case, you meet four people and play bocce badly.</p>
-      <button class="btn dl" onclick="location.href='https://app.spur.surf'">Open Spur in your browser <i>&rsaquo;</i></button>
+      <button class="btn dl" onclick="openApp()">Open the app <i>&rsaquo;</i></button>
       <div class="meta">Toronto first &middot; 18+ &middot; Free to join &middot; iOS beta via TestFlight</div>
     </div>
   </div>
@@ -757,7 +757,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
       <a href="/about.html">About Spur</a>
       <a href="/faq.html">FAQ</a>
       <a href="/contact.html">Contact us</a>
-      <a href="https://app.spur.surf">Open the app</a>
+      <a href="https://app.spur.surf" onclick="event.preventDefault();openApp()">Open the app</a>
       <a href="mailto:hello@spur.surf?subject=Venue%20partnership">Put your venue on Spur</a>
     </nav>
   </div>
@@ -1593,6 +1593,7 @@ function buildRoad(){
       }
       return false;
     }
+    road.overlapsTaken = overlapsTaken;   /* night pills consult this too */
     PLAN.forEach(function(p, i){
       var inner = SCENES[p.k];
       if(!inner) return;
@@ -2056,8 +2057,16 @@ function buildRoad(){
       var centerY = np * (docH - vhNow) + vhNow * 0.5;
       for(var k = 0; k < 3; k++){
         var lab = LAB[ni*3 + k];
-        var pt = road.line.getPointAtLength(lenAtY(centerY + (k - 1) * 250));
-        var tgx = Math.min(Math.max(pt.x, lab[1]/2 + 16), vw - lab[1]/2 - 16);
+        /* keep the label pills OFF the characters: slide further down the
+           line until the pill's rectangle is clear of every placed scene */
+        var tryY = centerY + (k - 1) * 250, pt, tgx;
+        for(var att = 0; att < 14; att++){
+          pt = road.line.getPointAtLength(lenAtY(tryY));
+          tgx = Math.min(Math.max(pt.x, lab[1]/2 + 16), vw - lab[1]/2 - 16);
+          if(!road.overlapsTaken ||
+             !road.overlapsTaken({x:tgx - lab[1]/2, y:pt.y - 52, w:lab[1], h:46}, 10)) break;
+          tryY += 140;
+        }
         var tg = el('g',{transform:'translate(' + tgx.toFixed(1) + ',' + (pt.y - 36).toFixed(1) + ')', opacity:0});
         tg.appendChild(el('circle',{cx:(pt.x - tgx).toFixed(1), cy:36, r:4.5, fill:C.ink}));
         tg.appendChild(el('rect',{x:-lab[1]/2, y:-13, width:lab[1], height:26, rx:13, fill:C.ink}));
@@ -3012,7 +3021,20 @@ function sbFetch(path, body){
 var MS_KEY = 'spur_ms_session';
 /* Open the web app; when we hold a live session, hand it over in the URL
    hash so the person is NOT asked to log in again on app.spur.surf. */
+var APP_STORE_URL = '';   /* ← paste the App Store link here the day the listing goes live */
 function openApp(){
+  var isPhone = /iPhone|iPad|Android/i.test(navigator.userAgent) || window.matchMedia('(max-width: 900px)').matches;
+  if(isPhone){
+    /* phones get the NATIVE app: try the deep link; if Spur isn't
+       installed, fall through to the store (or the beta invite until the
+       store listing exists). No web-app-on-a-phone. */
+    var fallback = APP_STORE_URL || 'mailto:hello@spur.surf?subject=' + encodeURIComponent('Spur beta (Toronto) — send me the app');
+    var t = setTimeout(function(){ location.href = fallback; }, 1600);
+    window.addEventListener('pagehide', function(){ clearTimeout(t); }, {once:true});
+    document.addEventListener('visibilitychange', function(){ if(document.hidden) clearTimeout(t); }, {once:true});
+    location.href = 'manusspurapp://';
+    return;
+  }
   var s = window.__session;
   if(s && s.access_token && s.refresh_token){
     location.href = 'https://app.spur.surf/#access_token=' + encodeURIComponent(s.access_token) +
@@ -3021,6 +3043,7 @@ function openApp(){
     location.href = 'https://app.spur.surf';
   }
 }
+window.openApp = openApp;
 function loggedOut(){
   window.__session = null;
   try { localStorage.removeItem(MS_KEY); } catch(e){}
