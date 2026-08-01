@@ -1630,7 +1630,7 @@ function buildRoad(){
          scenes were landing on the hills — search forward only to there,
          then search backwards instead */
       var AT_MAX = 0.93;
-      for(var tries = 0; tries < 40 && overlapsTaken({x:x, y:y, w:p.w, h:h}, 18); tries++){
+      for(var tries = 0; vw < 640 && tries < 40 && overlapsTaken({x:x, y:y, w:p.w, h:h}, 18); tries++){
         at = (vw >= 640) ? Math.min(0.995, at + 0.012) : (tries < 20 ? Math.min(AT_MAX, at + 0.012) : Math.max(0.06, at - 0.014));
         settle(at);
       }
@@ -1649,7 +1649,7 @@ function buildRoad(){
           /* the re-stand can shift the scene back into a spot we already
              rejected (that's how the soccer squad ended up on the download
              button's small print) — collision-check the FINAL position too */
-          for(var t2 = 0; t2 < 40 && overlapsTaken({x:x, y:y, w:p.w, h:h}, 18); t2++){
+          for(var t2 = 0; vw < 640 && t2 < 40 && overlapsTaken({x:x, y:y, w:p.w, h:h}, 18); t2++){
             at = (vw >= 640) ? Math.min(0.995, at + 0.012) : (t2 < 20 ? Math.min(AT_MAX, at + 0.012) : Math.max(0.06, at - 0.014));
             settle(at);
             y = Math.max(pt.y + h * 0.20 - (cb.y + cb.height) * sc, 24);
@@ -1782,7 +1782,7 @@ function buildRoad(){
         if(vw < 640){ by += bh * 0.52; }
         /* and never on top of the final copy or another scene */
         var bTries = 0;
-        while(bTries++ < 20 && overlapsTaken({x:bx, y:by, w:bw, h:bh}, 18)) by += 60;
+        while(vw < 640 && bTries++ < 20 && overlapsTaken({x:bx, y:by, w:bw, h:bh}, 18)) by += 60;
         /* …but never half off the bottom of the page either */
         var bMax = endSec.section.offsetTop + endSec.section.offsetHeight - bh - 28;
         if(by > bMax) by = bMax;
@@ -2075,7 +2075,7 @@ function buildRoad(){
         for(var att = 0; att < 14; att++){
           pt = road.line.getPointAtLength(lenAtY(tryY));
           tgx = Math.min(Math.max(pt.x, lab[1]/2 + 16), vw - lab[1]/2 - 16);
-          if(!road.overlapsTaken ||
+          if(vw >= 640 || !road.overlapsTaken ||
              !road.overlapsTaken({x:tgx - lab[1]/2, y:pt.y - 52, w:lab[1], h:46}, 10)) break;
           tryY += 140;
         }
@@ -2086,7 +2086,7 @@ function buildRoad(){
         tx2.textContent = lab[0];
         tx2.style.font = '700 9.5px "Space Mono", monospace'; tx2.style.letterSpacing = '1px';
         tg.appendChild(tx2);
-        (road.castSvg || svg).appendChild(tg);
+        ((vw < 640 && road.castSvg) || svg).appendChild(tg);
         road.nightTags.push(tg);
       }
     });
