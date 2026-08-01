@@ -9,6 +9,7 @@ const PAGES = [
   { file: "terms.html", title: "Terms of service" },
   { file: "community-guidelines.html", title: "Community guidelines" },
   { file: "disclaimer.html", title: "Disclaimer" },
+  { file: "safety-guidelines.html", title: "Safety guidelines" },
 ];
 
 const chrome = (title, inner) => `<!DOCTYPE html>
@@ -73,6 +74,7 @@ ${inner}
       <a href="/terms.html">Terms of service</a>
       <a href="/community-guidelines.html">Community guidelines</a>
       <a href="/disclaimer.html">Disclaimer</a>
+      <a href="/safety-guidelines.html">Safety guidelines</a>
     </nav>
     <nav aria-label="Contact">
       <div class="flab">Get in touch</div>
