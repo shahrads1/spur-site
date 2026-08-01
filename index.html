@@ -1598,6 +1598,7 @@ function buildRoad(){
     PLAN.forEach(function(p, i){
       var inner = SCENES[p.k];
       if(!inner) return;
+      if(p.k === 'soccer' && vw < 640) return;   /* phones: no soccer trio */
       var vbp = (SCENE_VB[p.k] || '0 0 1280 832').split(/\s+/);
       var VW0 = +vbp[2], VH0 = +vbp[3];
       /* never wider than the viewport allows — on a phone the desktop
