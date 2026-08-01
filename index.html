@@ -1661,9 +1661,27 @@ function buildRoad(){
           g2.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + sc.toFixed(4) + ')');
         }
       } catch(e){}
-      /* the cyclists lean into the slope so they ride ALONG the line */
-      if(p.k === 'cycling'){
-        g2.setAttribute('transform', g2.getAttribute('transform') + ' rotate(-33 640 416)');
+      /* the cyclists ride ON the black line: find the line point nearest the
+         scene, read the line's real slope there, rotate to match and drop
+         the wheels onto it — no guessed angles */
+      if(p.k === 'cycling' && road.line){
+        try {
+          var cxm = x + p.w/2, cym = y + h*0.7, bestL = 0, bestD = 1e18;
+          for(var L3 = 0; L3 <= road.llen; L3 += 40){
+            var q3 = road.line.getPointAtLength(L3);
+            var d3 = (q3.x-cxm)*(q3.x-cxm) + (q3.y-cym)*(q3.y-cym);
+            if(d3 < bestD){ bestD = d3; bestL = L3; }
+          }
+          var pA = road.line.getPointAtLength(Math.max(0, bestL - 60));
+          var pB = road.line.getPointAtLength(Math.min(road.llen, bestL + 60));
+          var ang = Math.atan2(pB.y - pA.y, pB.x - pA.x) * 180 / Math.PI;
+          if(ang > 90) ang -= 180; if(ang < -90) ang += 180;   /* keep them upright */
+          var pOn = road.line.getPointAtLength(bestL);
+          var dy2 = pOn.y - (y + h * 0.94);   /* wheel-bottoms onto the line */
+          y = y + dy2;
+          g2.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) +
+            ') scale(' + sc.toFixed(4) + ') rotate(' + ang.toFixed(1) + ' 640 416)');
+        } catch(e){}
       }
       road.claim(x, y, p.w, h);
       takenRects.push({x:x, y:y, w:p.w, h:h});
