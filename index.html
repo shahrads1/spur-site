@@ -182,8 +182,27 @@
     background:var(--paper);border-radius:14px;padding:15px 16px;
     box-shadow:0 6px 20px rgba(42,46,43,.10);
     display:flex;align-items:center;gap:12px;
+    cursor:pointer;transition:transform .14s, box-shadow .14s;
   }
+  .ex-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(42,46,43,.16)}
   .ex-none{grid-column:1/-1;font-size:14px;opacity:.75;padding:10px 2px}
+
+  /* ---------- event detail modal (post view) ---------- */
+  #evModal{
+    position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;
+    background:rgba(42,46,43,.45);padding:20px;
+  }
+  #evModal[hidden]{display:none}
+  .ev-dot{width:14px;height:14px;border-radius:50%;display:inline-block;margin-bottom:10px}
+  .ev-rows{
+    margin-top:16px;text-align:left;display:grid;grid-template-columns:auto 1fr;
+    gap:8px 16px;font-size:13.5px;font-weight:600;
+  }
+  .ev-rows b{
+    font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.08em;
+    text-transform:uppercase;opacity:.55;align-self:center;font-weight:700;
+  }
+  .ev-desc{text-align:left;font-size:13.5px;line-height:1.55;margin-top:14px;opacity:.85}
   @media(max-width:680px){
     .ex-body{flex-direction:column}
     .ex-side{width:100%;border-right:none;border-bottom:1px solid rgba(42,46,43,.14);
@@ -212,6 +231,14 @@
     background:var(--teal);color:var(--ink);font-family:'Bricolage Grotesque',sans-serif;
     font-size:12px;font-weight:800;padding:0 14px;
   }
+  .lm-row2{display:flex;gap:8px;margin-top:12px}
+  .lm-row2 button{
+    flex:1;border:none;cursor:pointer;border-radius:12px;padding:11px;
+    font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:800;
+  }
+  #lmLogin{background:var(--ink);color:var(--paper)}
+  #lmLogin:hover{background:#3d4340}
+  #lmSignup{background:#FFD23F;color:var(--ink)}
 
   /* ---------- boot cover ----------
      Everything on this page is drawn by script: the road, the cast, the
@@ -535,7 +562,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
   </div>
 </nav>
 <div id="caps">
-  <button class="cap y" onclick="openApp()">Log in</button>
+  <button class="cap y" id="loginLink">Log in / Sign up</button>
 </div>
 
 <!-- EXPLORE — the app's explore page, open access on the web, demo data -->
@@ -602,8 +629,8 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
 <path d="M5454 3130 c-32 -16 -94 -60 -136 -98 -153 -137 -265 -175 -518 -175
 -261 0 -402 38 -597 159 -154 97 -287 47 -271 -101 13 -110 145 -255 299 -330
 302 -145 761 -155 1073 -23 153 65 318 203 381 318 100 185 -45 343 -231 250z"/></g><g class="lg-spark" stroke-width="23" stroke-linecap="round" fill="none"><path d="M433.2 225.8L391.8 197.8"/><path d="M460.4 204.9L438.9 142.5"/><path d="M495.6 204.9L517.1 142.5"/><path d="M522.8 225.8L564.2 197.8"/></g></svg>
-    <h3>Log in to Spur</h3>
-    <p>Same account as the app on your phone.</p>
+    <h3>Log in or sign up</h3>
+    <p>Same account as the app on your phone. New here? Sign up right below.</p>
     <button class="lm-google" id="lmGoogle">
       <svg viewBox="0 0 18 18" width="17" height="17"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.28-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59A9 9 0 0 0 9 0 9 9 0 0 0 .96 4.95l3 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
       Continue with Google
@@ -617,7 +644,34 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
       <input inputmode="numeric" id="lmCode" placeholder="6-digit code">
       <button class="lm-mini" id="lmVerify">Verify</button>
     </div>
+    <div class="lm-div"><span>or classic email</span></div>
+    <input type="email" id="lmEmail" placeholder="you@email.com" autocomplete="email">
+    <input type="password" id="lmPass" placeholder="Password" autocomplete="current-password">
+    <div class="lm-row2">
+      <button id="lmLogin">Log in</button>
+      <button id="lmSignup">Sign up</button>
+    </div>
     <div class="lm-note" id="lmNote"></div>
+  </div>
+</div>
+
+<!-- event detail — what a post has to offer, once you're logged in.
+     Joining and chat live in the app; this is the read-only look. -->
+<div id="evModal" hidden>
+  <div class="lm-card">
+    <button class="lm-x" id="evX" aria-label="Close">&times;</button>
+    <span class="ev-dot" id="evDot"></span>
+    <h3 id="evName"></h3>
+    <p id="evTag"></p>
+    <div class="ev-rows">
+      <b>When</b><span id="evWhen"></span>
+      <b>Where</b><span id="evWhere"></span>
+      <b>Host</b><span id="evHost"></span>
+      <b>Spots</b><span id="evSpots"></span>
+    </div>
+    <p class="ev-desc" id="evDesc"></p>
+    <button class="btn hy lm-go" id="evJoin">Join on Spur &rsaquo;</button>
+    <div class="lm-note">Joining, group chat and the host&rsquo;s profile live in the app.</div>
   </div>
 </div>
 
@@ -2898,20 +2952,20 @@ document.querySelectorAll('[data-reveal]').forEach(function(n){
    the app's events endpoint returning the same shape.
    ===================================================== */
 var EVENTS = [
-  {q:'ping-pong ping pong table tennis', n:'Basement Ping-Pong Ladder', v:'SPiN Toronto', km:1.2, t:'today', tt:'Tonight 7:30', s:2, c:C.teal},
-  {q:'drinks patio', n:'Golden Hour Patio Hang', v:'Kensington Market', km:1.8, t:'today', tt:'Tonight 9:00', s:4, c:C.lilac},
-  {q:'bocce ball', n:'Sunset Bocce', v:'Christie Pits', km:2.1, t:'today', tt:'Tonight 6:45', s:3, c:C.green},
-  {q:'board games cards euchre', n:'Euchre & Snacks', v:'Snakes & Lattes', km:2.4, t:'today', tt:'Tonight 7:00', s:3, c:C.yellow},
-  {q:'basketball ball pickup', n:'3-on-3 Pickup', v:'Trinity Bellwoods', km:2.9, t:'tomorrow', tt:'Tomorrow 6:30', s:2, c:C.teal},
-  {q:'run running jog', n:'Waterfront Run Club', v:'Martin Goodman Trail', km:3.1, t:'tomorrow', tt:'Tomorrow 6:00', s:8, c:C.green},
-  {q:'badminton racket', n:'Drop-in Badminton', v:'High Park courts', km:3.4, t:'today', tt:'Tonight 8:00', s:1, c:C.yellow},
-  {q:'soccer football ball', n:'Casual 5-a-side', v:'Ramsden Park', km:4.4, t:'tomorrow', tt:'Tomorrow 7:00', s:3, c:C.green},
-  {q:'picnic blanket', n:'Golden Hour Picnic', v:'Riverdale Park East', km:4.9, t:'weekend', tt:'Sun 5:00', s:5, c:C.lilac},
-  {q:'cycling bike ride', n:'Night Ride', v:'Don Valley trails', km:5.6, t:'today', tt:'Tonight 8:30', s:2, c:C.teal},
-  {q:'bbq barbecue grill', n:'Charcoal & Corn', v:'Cherry Beach fire pits', km:6.8, t:'weekend', tt:'Sat 2:00', s:5, c:C.yellow},
-  {q:'frisbee ultimate disc', n:'Ultimate Toss', v:'Toronto Islands', km:8.9, t:'weekend', tt:'Sun 11:00', s:6, c:C.lilac},
-  {q:'canoe kayak paddle', n:'Harbour Paddle', v:'Toronto Islands', km:9.3, t:'weekend', tt:'Sat 10:00', s:2, c:C.teal},
-  {q:'volleyball beach ball', n:'Beach Volley Jam', v:'Woodbine Beach', km:11.2, t:'weekend', tt:'Sat 4:00', s:4, c:C.green}
+  {q:'ping-pong ping pong table tennis', n:'Basement Ping-Pong Ladder', v:'SPiN Toronto', km:1.2, t:'today', tt:'Tonight 7:30', s:2, c:C.teal, h:'Marcus L.', d:'Casual ladder night, all levels. Paddles provided, winner stays on. We grab a booth after the last round.'},
+  {q:'drinks patio', n:'Golden Hour Patio Hang', v:'Kensington Market', km:1.8, t:'today', tt:'Tonight 9:00', s:4, c:C.lilac, h:'Priya S.', d:'Low-key patio session while the weather holds. First round is on the host if you bring a good story.'},
+  {q:'bocce ball', n:'Sunset Bocce', v:'Christie Pits', km:2.1, t:'today', tt:'Tonight 6:45', s:3, c:C.green, h:'Tony R.', d:'Bocce on the west lawn until the light goes. Total beginners welcome — Tony explains the rules in one minute.'},
+  {q:'board games cards euchre', n:'Euchre & Snacks', v:'Snakes & Lattes', km:2.4, t:'today', tt:'Tonight 7:00', s:3, c:C.yellow, h:'Dana K.', d:'Euchre table booked for four. Snacks on the table, stakes purely reputational.'},
+  {q:'basketball ball pickup', n:'3-on-3 Pickup', v:'Trinity Bellwoods', km:2.9, t:'tomorrow', tt:'Tomorrow 6:30', s:2, c:C.teal, h:'Jerome W.', d:'Half-court 3-on-3, first to 21. Bring water and a light + dark shirt.'},
+  {q:'run running jog', n:'Waterfront Run Club', v:'Martin Goodman Trail', km:3.1, t:'tomorrow', tt:'Tomorrow 6:00', s:8, c:C.green, h:'Ana M.', d:'Easy 6k along the water, conversational pace. Nobody gets dropped — coffee at the turnaround.'},
+  {q:'badminton racket', n:'Drop-in Badminton', v:'High Park courts', km:3.4, t:'today', tt:'Tonight 8:00', s:1, c:C.yellow, h:'Wei C.', d:'Doubles rotation, one court, spare racket available. One spot left — grab it.'},
+  {q:'soccer football ball', n:'Casual 5-a-side', v:'Ramsden Park', km:4.4, t:'tomorrow', tt:'Tomorrow 7:00', s:3, c:C.green, h:'Lucas F.', d:'Friendly 5-a-side, jumpers for goalposts energy. All feet welcome, no slide tackles.'},
+  {q:'picnic blanket', n:'Golden Hour Picnic', v:'Riverdale Park East', km:4.9, t:'weekend', tt:'Sun 5:00', s:5, c:C.lilac, h:'Noor A.', d:'Potluck picnic on the hill with the skyline view. Bring one thing to share and a blanket if you have one.'},
+  {q:'cycling bike ride', n:'Night Ride', v:'Don Valley trails', km:5.6, t:'today', tt:'Tonight 8:30', s:2, c:C.teal, h:'Sam D.', d:'Relaxed night loop through the valley, lights required. Regroup at every bridge, nobody rides alone.'},
+  {q:'bbq barbecue grill', n:'Charcoal & Corn', v:'Cherry Beach fire pits', km:6.8, t:'weekend', tt:'Sat 2:00', s:5, c:C.yellow, h:'Big Mike', d:'Charcoal, corn, and whatever you throw on the grill. Fire pit is booked 2-6, bring something to flip.'},
+  {q:'frisbee ultimate disc', n:'Ultimate Toss', v:'Toronto Islands', km:8.9, t:'weekend', tt:'Sun 11:00', s:6, c:C.lilac, h:'Chloe B.', d:'Pickup ultimate on the island field, ferry over at 10:15 together. Cleats optional, sunscreen not.'},
+  {q:'canoe kayak paddle', n:'Harbour Paddle', v:'Toronto Islands', km:9.3, t:'weekend', tt:'Sat 10:00', s:2, c:C.teal, h:'Owen P.', d:'Rental canoes from the island dock, easy lagoon route. Zero experience needed, everything provided.'},
+  {q:'volleyball beach ball', n:'Beach Volley Jam', v:'Woodbine Beach', km:11.2, t:'weekend', tt:'Sat 4:00', s:4, c:C.green, h:'Gaby T.', d:'Two nets, rotating teams, music on. Stays going till sunset if the vibe holds.'}
 ];
 /* ---------- EXPLORE: the app's explore page, open on the web ---------- */
 var EX = { km:5, when:'', acts:{}, q:'' };
@@ -2926,11 +2980,13 @@ function exMatch(e){
   if(EX.q && (e.q + ' ' + e.n + ' ' + e.v).toLowerCase().indexOf(EX.q) === -1) return false;
   return true;
 }
+var exRows = [];   /* what's on screen right now, for the click-through */
 function exRender(){
   var rows = EVENTS.filter(exMatch).sort(function(a,b){ return a.km - b.km; });
+  exRows = rows;
   var h = '';
-  rows.forEach(function(e){
-    h += '<div class="ex-card"><span class="r-dot" style="background:' + e.c + '"></span>'
+  rows.forEach(function(e, ri){
+    h += '<div class="ex-card" data-ei="' + ri + '"><span class="r-dot" style="background:' + e.c + '"></span>'
       + '<div class="r-main"><div class="r-name">' + e.n + '</div>'
       + '<div class="r-meta">' + e.v + ' &middot; ' + e.km.toFixed(1) + ' km &middot; ' + e.tt + '</div></div>'
       + '<span class="r-spots">' + e.s + ' spot' + (e.s>1?'s':'') + ' left</span></div>';
@@ -2977,6 +3033,39 @@ var hsGoEl = document.getElementById('hsGo');
 if(hsGoEl) hsGoEl.addEventListener('click', function(){
   EX.q = navSearch.value.trim().toLowerCase(); exOpen();
 });
+
+/* clicking a result: members get the full post (when, where, host, the
+   pitch); everyone else is asked to log in / sign up first, and the post
+   they wanted opens itself right after they do */
+var evM = document.getElementById('evModal');
+function openEvent(e){
+  document.getElementById('evDot').style.background = e.c;
+  document.getElementById('evName').textContent = e.n;
+  document.getElementById('evTag').textContent = e.km.toFixed(1) + ' km away';
+  document.getElementById('evWhen').textContent = e.tt;
+  document.getElementById('evWhere').textContent = e.v;
+  document.getElementById('evHost').textContent = e.h || 'A Spur member';
+  document.getElementById('evSpots').textContent = e.s + ' spot' + (e.s>1?'s':'') + ' left';
+  document.getElementById('evDesc').textContent = e.d || '';
+  evM.hidden = false;
+}
+window.__openEvent = openEvent;
+exRes.addEventListener('click', function(ev){
+  var card = ev.target.closest ? ev.target.closest('.ex-card') : null;
+  if(!card) return;
+  var e = exRows[+card.getAttribute('data-ei')];
+  if(!e) return;
+  if(window.__session){ openEvent(e); return; }
+  window.__pendingEv = e;
+  var lm = document.getElementById('loginModal');
+  if(lm) lm.hidden = false;
+  var n = document.getElementById('lmNote');
+  if(n) n.textContent = 'You need to log in or sign up to see this event.';
+});
+document.getElementById('evX').addEventListener('click', function(){ evM.hidden = true; });
+evM.addEventListener('click', function(e){ if(e.target === evM) evM.hidden = true; });
+document.getElementById('evJoin').addEventListener('click', function(){ if(window.openApp) window.openApp(); });
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') evM.hidden = true; });
 
 /* the white capsule lives in the hero until you scroll, then docks */
 var navEl = document.querySelector('nav');
@@ -3070,7 +3159,7 @@ function loggedOut(){
   window.__session = null;
   try { localStorage.removeItem(MS_KEY); } catch(e){}
   var link = document.getElementById('loginLink');
-  if(link) link.textContent = 'Log in';
+  if(link) link.textContent = 'Log in / Sign up';
   var m = document.getElementById('acctMenu');
   if(m) m.remove();
 }
@@ -3115,6 +3204,11 @@ function loggedIn(session){
   var who = (session.user && (session.user.email || session.user.phone)) || 'Logged in';
   if(link) link.textContent = String(who).split('@')[0];
   modal.hidden = true;
+  /* they logged in to see a specific post — show them that post */
+  if(window.__pendingEv && window.__openEvent){
+    window.__openEvent(window.__pendingEv);
+    window.__pendingEv = null;
+  }
   /* Same ecosystem as the app: exchange the Supabase token with the Spur
      backend, which knows the profile — greet by first name, not phone. */
   if(session.access_token){
@@ -3127,10 +3221,11 @@ function loggedIn(session){
     }).catch(function(){});
   }
 }
-/* the header capsule now goes straight to the app; the modal machinery
-   stays wired for any page element with id="loginLink" (none today) */
+/* the capsule: phones go straight to the app; on the web it's the door —
+   members get their account menu, everyone else the log in / sign up card */
 var loginLinkEl = document.getElementById('loginLink');
 if(loginLinkEl) loginLinkEl.addEventListener('click', function(){
+  if(window.matchMedia('(max-width: 640px)').matches){ openApp(); return; }
   if(window.__session){ showAcctMenu(); } else { modal.hidden = false; }
 });
 modal.addEventListener('click', function(e){ if(e.target === modal) modal.hidden = true; });
@@ -3161,6 +3256,32 @@ document.getElementById('lmVerify').addEventListener('click', function(){
   if(!sbReady()){ note('Demo mode — verification activates once the Supabase keys are in.'); return; }
   sbFetch('verify', {type:'sms', phone: ph, token: code}).then(function(r){
     if(r.ok && r.j.access_token) loggedIn(r.j); else note(r.j.msg || 'That code didn’t work.');
+  });
+});
+/* classic email: existing members log in, new people sign up on the spot */
+function emailCreds(){
+  var em = document.getElementById('lmEmail').value.trim();
+  var pw = document.getElementById('lmPass').value;
+  if(!em || em.indexOf('@') === -1){ note('Enter your email first.'); return null; }
+  if(!pw){ note('Enter a password too.'); return null; }
+  return {email: em, password: pw};
+}
+document.getElementById('lmLogin').addEventListener('click', function(){
+  var cr = emailCreds(); if(!cr) return;
+  if(!sbReady()){ note('Demo mode — email login activates once the Supabase keys are in.'); return; }
+  sbFetch('token?grant_type=password', cr).then(function(r){
+    if(r.ok && r.j.access_token) loggedIn(r.j);
+    else note(r.j.error_description || r.j.msg || 'That email and password didn’t match.');
+  });
+});
+document.getElementById('lmSignup').addEventListener('click', function(){
+  var cr = emailCreds(); if(!cr) return;
+  if(cr.password.length < 8){ note('Pick a password with at least 8 characters.'); return; }
+  if(!sbReady()){ note('Demo mode — sign-up activates once the Supabase keys are in.'); return; }
+  sbFetch('signup', cr).then(function(r){
+    if(r.ok && r.j.access_token) loggedIn(r.j);
+    else if(r.ok) note('Almost there — confirm your email from your inbox, then log in here.');
+    else note(r.j.msg || r.j.error_description || 'Could not create the account — try another email.');
   });
 });
 /* returning from Google OAuth: Supabase puts tokens in the URL hash */
