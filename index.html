@@ -519,7 +519,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
 </nav>
 <div id="caps">
   <button class="cap y" id="loginLink">Log in</button>
-  <button class="cap o" data-beta>Join the beta</button>
+  <button class="cap o" onclick="location.href='https://app.spur.surf'">Open the app</button>
 </div>
 
 <!-- EXPLORE — the app's explore page, open access on the web, demo data -->
@@ -695,7 +695,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
     <div class="final" data-reveal>
       <h2>Ready when you are.</h2>
       <p>Pick something happening tonight and go. Worst case, you meet four people and play bocce badly.</p>
-      <button class="btn dl" data-beta>Join the beta <i>&rsaquo;</i></button>
+      <button class="btn dl" onclick="location.href='https://app.spur.surf'">Open Spur in your browser <i>&rsaquo;</i></button>
       <div class="meta">Toronto first &middot; 18+ &middot; Free to join &middot; iOS beta via TestFlight</div>
     </div>
   </div>
@@ -2860,6 +2860,39 @@ function sbFetch(path, body){
     body: JSON.stringify(body)
   }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); });
 }
+function loggedOut(){
+  window.__session = null;
+  var link = document.getElementById('loginLink');
+  link.textContent = 'Log in';
+  var m = document.getElementById('acctMenu');
+  if(m) m.remove();
+}
+function showAcctMenu(){
+  var old = document.getElementById('acctMenu');
+  if(old){ old.remove(); return; }
+  var link = document.getElementById('loginLink');
+  var m = document.createElement('div');
+  m.id = 'acctMenu';
+  m.style.cssText = 'position:fixed;top:64px;right:40px;z-index:60;background:#fff;border:2px solid #2A2E2B;border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:4px;box-shadow:0 10px 30px rgba(42,46,43,.18);font-family:\'Bricolage Grotesque\',sans-serif';
+  function item(label, fn){
+    var b = document.createElement('button');
+    b.textContent = label;
+    b.style.cssText = 'border:0;background:none;font:inherit;font-weight:700;font-size:14px;color:#2A2E2B;padding:8px 14px;border-radius:9px;cursor:pointer;text-align:left';
+    b.onmouseenter = function(){ b.style.background = '#F0EBE0'; };
+    b.onmouseleave = function(){ b.style.background = 'none'; };
+    b.onclick = fn;
+    m.appendChild(b);
+  }
+  item('Open the app ›', function(){ location.href = 'https://app.spur.surf'; });
+  item('Log out', function(){
+    var s = window.__session;
+    if(s && s.access_token){
+      fetch(SUPABASE.url + '/auth/v1/logout', {method:'POST', headers:{apikey:SUPABASE.anonKey, Authorization:'Bearer ' + s.access_token}}).catch(function(){});
+    }
+    loggedOut();
+  });
+  document.body.appendChild(m);
+}
 function loggedIn(session){
   window.__session = session;
   var link = document.getElementById('loginLink');
@@ -2878,7 +2911,9 @@ function loggedIn(session){
     }).catch(function(){});
   }
 }
-document.getElementById('loginLink').addEventListener('click', function(){ modal.hidden = false; });
+document.getElementById('loginLink').addEventListener('click', function(){
+  if(window.__session){ showAcctMenu(); } else { modal.hidden = false; }
+});
 modal.addEventListener('click', function(e){ if(e.target === modal) modal.hidden = true; });
 modal.querySelector('.lm-x').addEventListener('click', function(){ modal.hidden = true; });
 document.addEventListener('keydown', function(e){ if(e.key === 'Escape') modal.hidden = true; });
