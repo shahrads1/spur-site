@@ -1659,7 +1659,7 @@ function buildRoad(){
       } catch(e){}
       /* the cyclists lean into the slope so they ride ALONG the line */
       if(p.k === 'cycling'){
-        g2.setAttribute('transform', g2.getAttribute('transform') + ' rotate(27 640 416)');
+        g2.setAttribute('transform', g2.getAttribute('transform') + ' rotate(-33 640 416)');
       }
       road.claim(x, y, p.w, h);
       takenRects.push({x:x, y:y, w:p.w, h:h});
