@@ -329,14 +329,15 @@
   }
   .panel.right{margin-left:auto}
   @media(max-width:640px){
-    /* compact cards on phones — small enough that placePanels() can slide
-       them beside the road instead of over it */
-    .panel{padding:18px 17px 17px;max-width:min(80vw,320px)}
+    /* tiny cards on phones — roughly a third of the desktop card, so they
+       always fit on open cream beside the road instead of over it */
+    .panel{padding:12px 13px 12px;max-width:min(58vw,225px);border-radius:12px}
     .panel.right{margin-left:0}
-    .panel h2{font-size:22px}
-    .panel p{font-size:13.5px;margin-top:9px}
-    .panel .btn{margin-top:16px;padding:11px 12px 11px 18px;font-size:13.5px}
-    .eyebrow{margin-bottom:8px}
+    .panel h2{font-size:15.5px;line-height:1.1}
+    .panel p{font-size:11.5px;line-height:1.45;margin-top:7px}
+    .panel .btn{margin-top:11px;padding:8px 9px 8px 14px;font-size:11.5px;gap:7px}
+    .panel .btn i{width:18px;height:18px;font-size:10px}
+    .eyebrow{font-size:8.5px;margin-bottom:6px}
   }
   .eyebrow{
     font-family:'Space Mono',monospace;
@@ -1749,6 +1750,23 @@ function buildRoad(){
       }
     }
   })();
+
+  /* Characters must be visible even when nothing animates: with Reduce
+     Motion on (common on iPhones) the GSAP reveal below never runs, and the
+     cast groups are created at opacity 0 — which blanked every character on
+     the page. Reduced mode shows them immediately; and a plain setTimeout
+     (independent of GSAP entirely) catches any other failure mode. */
+  function forceCastVisible(){
+    document.querySelectorAll('#castlayer g.cast').forEach(function(g){
+      if(parseFloat(getComputedStyle(g).opacity || '0') < 0.05){
+        g.setAttribute('opacity', '1');
+        g.style.opacity = '1';
+        g.style.visibility = 'visible';
+      }
+    });
+  }
+  if(REDUCED) forceCastVisible();
+  setTimeout(forceCastVisible, 2600);
 
   /* ---- panels: nudge each white card off the road into clear cream.
      Uses left/top (not transform) because GSAP owns transform here. ---- */
