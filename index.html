@@ -258,7 +258,9 @@
   section.on-path .final p{opacity:1;color:var(--ink)}
   section.on-path .meta{opacity:.85;color:var(--cream)}
   @media(max-width:640px){
-    section{min-height:100vh;padding:90px 16px}
+    /* taller sections on phones: the road needs slack so the white cards
+       can find clear cream beside it instead of sitting on the band */
+    section{min-height:118vh;padding:90px 16px}
   }
   .inner{
     position:relative;z-index:5;
@@ -273,12 +275,10 @@
   #castlayer svg{display:block;width:100%;height:100%;overflow:visible}
   #road svg{display:block;width:100%;height:100%;overflow:visible}
   section{z-index:1}
-  /* on a phone there is no room to nudge the white cards clear of the
-     figures, so the copy wins: characters drop behind the sections */
-  @media(max-width:900px){
-    #castlayer{z-index:1}
-    section{z-index:2}
-  }
+  /* Characters keep their own layer above section art on every size —
+     placePanels() shrinks and relocates the white cards on phones instead
+     (the old behaviour dropped the cast behind the hills, which read as
+     "half the page didn't load" on mobile). */
 
   /* the hero's cream ground must NOT bleed past the hero — it was
      painting over the road's corner entry in the next section */
@@ -329,8 +329,14 @@
   }
   .panel.right{margin-left:auto}
   @media(max-width:640px){
-    .panel{padding:24px 22px 22px}
+    /* compact cards on phones — small enough that placePanels() can slide
+       them beside the road instead of over it */
+    .panel{padding:18px 17px 17px;max-width:min(80vw,320px)}
     .panel.right{margin-left:0}
+    .panel h2{font-size:22px}
+    .panel p{font-size:13.5px;margin-top:9px}
+    .panel .btn{margin-top:16px;padding:11px 12px 11px 18px;font-size:13.5px}
+    .eyebrow{margin-bottom:8px}
   }
   .eyebrow{
     font-family:'Space Mono',monospace;
@@ -717,7 +723,9 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
   #site-foot .fbrand i{width:10px;height:10px;border-radius:99px;background:var(--path);display:inline-block}
   #site-foot small{display:block;font-size:12px;line-height:1.8;opacity:.75}
   #site-foot small a{color:inherit}
-  #site-foot nav{display:flex;flex-direction:column;gap:7px}
+  /* the page styles bare <nav> as fixed chrome — footer navs must opt out
+     or they fly to the top of the viewport and pile up over the header */
+  #site-foot nav{position:static;top:auto;left:auto;transform:none;width:auto;z-index:auto;display:flex;flex-direction:column;gap:7px}
   #site-foot nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent}
   #site-foot nav a:hover{border-bottom-color:var(--path)}
   #site-foot nav a:focus-visible{outline:2px solid var(--path);outline-offset:3px}
@@ -1710,6 +1718,9 @@ function buildRoad(){
         var bsc = bw / 1280, bh = 832 * bsc;
         var bx  = anchor.x - bw / 2, by = anchor.y - bh * 0.94;
         bx = Math.min(Math.max(bx, 12), Math.max(12, vw - bw - 12));  /* phones crop the trees away */
+        /* on phones the anchor lands on the CTA/meta text — play further
+           down the field where the grass is actually empty */
+        if(vw < 640){ by += bh * 0.52; }
         var bwrap = el('g', {'class':'cast', opacity:0});
         var bg = el('g', {transform:'translate(' + bx.toFixed(1) + ',' + by.toFixed(1) + ') scale(' + bsc.toFixed(4) + ')'});
         bg.innerHTML = SCENES.badminton;
@@ -1747,6 +1758,20 @@ function buildRoad(){
       while(n){ x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
       return {x:x, y:y, w:node.offsetWidth, h:node.offsetHeight};
     }
+    /* how many occupied grid cells a rect would cover — lets us fall back
+       to "least damage" when a phone screen has no fully clear spot */
+    function coverCount(x, y, w, h){
+      var g = road.grid; if(!g) return 0;
+      var n = 0;
+      var c0=Math.max(0,Math.floor(x/g.G)), c1=Math.min(g.cols-1,Math.floor((x+w)/g.G));
+      var r0=Math.max(0,Math.floor(y/g.G)), r1=Math.min(g.rows-1,Math.floor((y+h)/g.G));
+      for(var r2=r0;r2<=r1;r2++) for(var c2=c0;c2<=c1;c2++) if(g.a[r2*g.cols+c2]) n++;
+      return n;
+    }
+    var phone = vw < 640;
+    var EDGE = phone ? 10 : 26;          /* how close to screen edges a card may sit */
+    var SECPAD = phone ? 36 : 70;        /* how close to its section's edges */
+    var STEP = phone ? 14 : 20;
     document.querySelectorAll('section[data-sec] .panel').forEach(function(p){
       p.style.position = 'relative';
       p.style.left = '0px'; p.style.top = '0px';
@@ -1755,20 +1780,27 @@ function buildRoad(){
       var sTop = sec.offsetTop, sBot = sTop + sec.offsetHeight;
       if(road.rectClear(b.x, b.y, b.w, b.h, 18)){ road.claim(b.x, b.y, b.w, b.h); return; }
       var best = null, bestD = Infinity;
-      for(var dx = -620; dx <= 920; dx += 20){
-        for(var dy = -520; dy <= 520; dy += 20){
+      var least = null, leastCover = Infinity;
+      for(var dx = -620; dx <= 920; dx += STEP){
+        for(var dy = -560; dy <= 560; dy += STEP){
           var nx = b.x + dx, ny = b.y + dy;
-          if(nx < 26 || nx + b.w > vw - 26) continue;
-          if(ny < sTop + 70 || ny + b.h > sBot - 70) continue;   /* stay in its own section */
-          if(!road.rectClear(nx, ny, b.w, b.h, 18)) continue;
+          if(nx < EDGE || nx + b.w > vw - EDGE) continue;
+          if(ny < sTop + SECPAD || ny + b.h > sBot - SECPAD) continue;   /* stay in its own section */
           var d = dx*dx*0.5 + dy*dy;
-          if(d < bestD){ bestD = d; best = [dx, dy, nx, ny]; }
+          if(road.rectClear(nx, ny, b.w, b.h, phone ? 8 : 18)){
+            if(d < bestD){ bestD = d; best = [dx, dy, nx, ny]; }
+          } else if(!best){
+            /* no clear spot found yet — remember the least-covering one */
+            var cc = coverCount(nx, ny, b.w, b.h) * 1e7 + d;
+            if(cc < leastCover){ leastCover = cc; least = [dx, dy, nx, ny]; }
+          }
         }
       }
-      if(best){
-        p.style.left = best[0] + 'px';
-        p.style.top  = best[1] + 'px';
-        road.claim(best[2], best[3], b.w, b.h);
+      var pick = best || least;
+      if(pick){
+        p.style.left = pick[0] + 'px';
+        p.style.top  = pick[1] + 'px';
+        road.claim(pick[2], pick[3], b.w, b.h);
       }
     });
   })();
