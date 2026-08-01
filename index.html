@@ -3194,6 +3194,15 @@ function showAcctMenu(){
       fetch(SUPABASE.url + '/auth/v1/logout', {method:'POST', headers:{apikey:SUPABASE.anonKey, Authorization:'Bearer ' + s.access_token}}).catch(function(){});
     }
     loggedOut();
+    /* one way out: a hidden beacon tells app.spur.surf (separate origin,
+       separate storage) to drop its session too */
+    try {
+      var fbeac = document.createElement('iframe');
+      fbeac.style.display = 'none';
+      fbeac.src = 'https://app.spur.surf/#logout';
+      document.body.appendChild(fbeac);
+      setTimeout(function(){ fbeac.remove(); }, 10000);
+    } catch(e){}
   });
   document.body.appendChild(m);
 }
@@ -3313,6 +3322,13 @@ if(location.hash.indexOf('access_token=') !== -1){
               expires_in: hp.expires_in ? +hp.expires_in : 3600,
               user:{email: hp.email || ''}}, true);
   }
+}
+
+/* arriving with #logged-out: the app just signed the person out (one way
+   out) — drop our copy of the session instead of restoring it */
+if(location.hash === '#logged-out'){
+  history.replaceState(null, '', location.pathname + location.search);
+  loggedOut();
 }
 
 /* every OTHER visit: restore the saved session so nobody has to log in
