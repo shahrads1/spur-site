@@ -2153,6 +2153,14 @@ function buildRoad(){
       wob.push([p1.x + nx*amp, p1.y + ny*amp + vy]);
     }
   }
+  /* phones: the meander + edge-hugging waypoints can carry the thin line
+     off screen — clamp it so it always stays visible (desktop untouched) */
+  if(vw < 640){
+    var linePad = 14;
+    wob.forEach(function(wp){
+      wp[0] = Math.max(linePad, Math.min(vw - linePad, wp[0]));
+    });
+  }
   road.line = el('path',{d:catmullPath(wob), fill:'none', stroke:C.ink, opacity:0.85,
     'stroke-width':4, 'stroke-linecap':'round'});
   svg.appendChild(road.line);
