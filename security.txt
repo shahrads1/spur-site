@@ -1,0 +1,5 @@
+Contact: mailto:hello@spur.surf
+Expires: 2027-08-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://spur.surf/.well-known/security.txt
+Policy: https://spur.surf/terms.html
