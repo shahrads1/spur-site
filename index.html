@@ -32,7 +32,11 @@
     --paper:#FFFFFF;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:auto}
+  /* iOS Safari ignores body-level overflow-x when positioned layers
+     (road/cast/plane) poke past the right edge — the page pans and a
+     cream gap appears. Clipping at the root is what iOS respects. */
+  html{scroll-behavior:auto;overflow-x:clip}
+  #road,#castlayer{overflow:hidden}
   html.lenis,html.lenis body{height:auto}
   .lenis.lenis-smooth{scroll-behavior:auto!important}
   body{
@@ -1309,19 +1313,6 @@ document.querySelectorAll('.layer').forEach(function(host){
     gFly.appendChild(gLakeFront);
     var gForestFront = el('g',{});
     gFly.appendChild(gForestFront);
-    /* a lake for phones: hidden on desktop, where the rods reach the
-       horizon lake instead. Same concept as the desktop lake, smaller:
-       it runs off the RIGHT edge of the screen with no visible end
-       (founder spec 2026-08-01), fishers at its left shore. Drawn first
-       so they stand in front of the water. */
-    var pond = el('g',{display:'none'});
-    pond.appendChild(el('path',{
-      d:'M 960 402 Q 1000 388 1120 390 Q 1300 386 1460 392 L 1580 392 L 1580 452 L 1460 450 Q 1250 454 1080 446 Q 990 442 962 424 Q 950 412 960 402 Z',
-      fill:C.teal, stroke:C.ink,'stroke-width':2.2}));
-    pond.appendChild(el('path',{
-      d:'M 1000 418 Q 1020 413 1040 418 M 1110 430 Q 1130 425 1150 430 M 1270 408 Q 1290 403 1310 408',
-      stroke:C.paper,'stroke-width':2,fill:'none','stroke-linecap':'round',opacity:.85}));
-    gLakeFront.appendChild(pond);
     function fisherBack(gx,gy,shirt,pants,skin,hair,dx){
       var F = el('g',{transform:'translate('+gx+','+gy+')'});
       F.appendChild(el('path',{d:'M -4 -14 L -4 0 M 4 -14 L 4 0',stroke:pants,'stroke-width':6,'stroke-linecap':'round',fill:'none'}));
@@ -1389,12 +1380,14 @@ document.querySelectorAll('.layer').forEach(function(host){
       gLakeFront.appendChild(splash);
       return {fish:fish, splash:splash, x:sx, y:sy};
     }
-    /* on phones the second spawn point moves into the phone lake's
-       on-screen stretch — the fish-arc timelines bake these coordinates
-       in at build time, so the decision happens here, not in layout */
+    /* on phones the spawn points ride higher and tuck in so the fish
+       jump from the on-screen stretch of the horizon lake (the fishers
+       stand a little below the crest there) — the fish-arc timelines
+       bake these coordinates in at build time, so the decision happens
+       here, not in the layout pass */
     var phoneWater = window.innerWidth < 640;
-    window.__pond  = mkFish(1040, 436);
-    window.__pond2 = mkFish(phoneWater ? 1150 : 1216, phoneWater ? 428 : 418);
+    window.__pond  = mkFish(1040, phoneWater ? 350 : 436);
+    window.__pond2 = mkFish(phoneWater ? 1120 : 1216, phoneWater ? 344 : 418);
 
     /* ---------------------------------------------------------------
        The goose family, v3 — proper Canada geese this time: black head
@@ -1556,10 +1549,14 @@ document.querySelectorAll('.layer').forEach(function(host){
         var trF = 'translate(' + dxF.toFixed(1) + ',' + dyF.toFixed(1) + ') scale(' + sF + ')';
         gForestBack.setAttribute('transform', trF);
         gForestFront.setAttribute('transform', trF);
-        /* the lake takes the RIGHT corner (running off the right edge,
-           like the desktop horizon lake), fishers at its left shore */
-        pond.removeAttribute('display');
-        var sL = 0.6, dxL = b1 - 104 - sL * 1045, dyL = 615 - sL * 481;
+        /* the lake sits at the TOP of the hill on the right, exactly the
+           desktop look: the real horizon lake slides left just enough to
+           bring its shore on screen (same proportional spot, ~62% across),
+           still painted behind the crest. The fishers shrink onto the
+           crest in front of it, rods over the water, desktop-style. */
+        gLakeBack.setAttribute('transform',
+          'translate(' + ((b0 + w * 0.62) - 838).toFixed(1) + ',0)');
+        var sL = 0.5, dxL = (b1 - 60) - sL * 1045, dyL = 526 - sL * 481;
         gLakeFront.setAttribute('transform',
           'translate(' + dxL.toFixed(1) + ',' + dyL.toFixed(1) + ') scale(' + sL + ')');
         /* the band only shows three field flowers — plant a few more,
