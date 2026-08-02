@@ -3349,6 +3349,9 @@ var BIRDS = {
     per.setAttribute('aria-label', t.label + ' — this bird has something to tell you');
     var vb = BIRDS[t.bird].vb.split(' ');
     per.__ratio = (+vb[3]) / (+vb[2]);
+    /* the owl reads oversized on the open field — founder wants it at
+       2/5 of the standard perch size (2026-08-02) */
+    per.__scale = t.bird === 'owl' ? 0.4 : 1;
     per.innerHTML = '<svg class="bp-bird" viewBox="' + BIRDS[t.bird].vb + '" aria-hidden="true">'
                   + BIRDS[t.bird].body + '</svg><span class="bp-bub">&hellip;</span>';
     host.appendChild(per);
@@ -3383,7 +3386,7 @@ var BIRDS = {
       var hb = host.getBoundingClientRect();
       var bb = pc.box.getBoundingClientRect();
       if(!bb.width) return;
-      var w = Math.min(150, Math.max(96, bb.width * 0.42));
+      var w = Math.min(150, Math.max(96, bb.width * 0.42)) * (pc.per.__scale || 1);
       var h = w * pc.per.__ratio;
       pc.per.style.width = w + 'px';
       pc.per.style.left  = (bb.left - hb.left + bb.width / 2 - w / 2) + 'px';
