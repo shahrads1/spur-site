@@ -5,24 +5,44 @@
 const fs = require("fs");
 
 const PAGES = [
-  { file: "privacy.html", title: "Privacy policy" },
-  { file: "terms.html", title: "Terms of service" },
-  { file: "community-guidelines.html", title: "Community guidelines" },
-  { file: "disclaimer.html", title: "Disclaimer" },
-  { file: "safety-guidelines.html", title: "Safety guidelines" },
+  { file: "privacy.html", title: "Privacy policy",
+    desc: "How Spur collects, uses, and protects your personal information — location blurring, Stripe-handled payments, and your privacy rights." },
+  { file: "terms.html", title: "Terms of service",
+    desc: "The terms of service for using Spur, the Toronto app for spontaneous in-person plans." },
+  { file: "community-guidelines.html", title: "Community guidelines",
+    desc: "The rules of the park: how we keep Spur meetups friendly, safe, and real." },
+  { file: "disclaimer.html", title: "Disclaimer",
+    desc: "What Spur is responsible for — and what stays between you and the people you meet." },
+  { file: "safety-guidelines.html", title: "Safety guidelines",
+    desc: "Practical safety tips for meeting new people through Spur, plus how to report and block." },
 ];
 
 // The smiley+spikes mark (eyes + smile + yellow sparks lifted from the SPUR
 // wordmark). Red dots are reserved for unread-message badges only.
 const MARK = `<svg class="mk" viewBox="383 136 204 330" aria-hidden="true"><g transform="translate(0,691) scale(0.1,-0.1)" class="mk-face"><path d="M5340 4267 c-53 -17 -123 -93 -149 -163 -51 -134 -47 -240 11 -363 135 -285 436 -216 479 108 37 276 -133 484 -341 418z"/><path d="M4023 4199 c-147 -56 -209 -278 -143 -509 54 -193 277 -241 414 -89 140 154 132 397 -17 541 -79 76 -158 94 -254 57z"/><path d="M5454 3130 c-32 -16 -94 -60 -136 -98 -153 -137 -265 -175 -518 -175 -261 0 -402 38 -597 159 -154 97 -287 47 -271 -101 13 -110 145 -255 299 -330 302 -145 761 -155 1073 -23 153 65 318 203 381 318 100 185 -45 343 -231 250z"/></g><g class="mk-spark" stroke-width="23" stroke-linecap="round" fill="none"><path d="M433.2 225.8L391.8 197.8"/><path d="M460.4 204.9L438.9 142.5"/><path d="M495.6 204.9L517.1 142.5"/><path d="M522.8 225.8L564.2 197.8"/></g></svg>`;
 
-const chrome = (title, inner) => `<!DOCTYPE html>
+const chrome = (title, inner, opts = {}) => `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${title} · Spur</title>
-<link rel="icon" type="image/png" href="/assets/favicon.png">
+<meta name="description" content="${opts.desc || "Spur — the Toronto app for spontaneous in-person plans."}">
+<link rel="canonical" href="https://spur.surf/${opts.file || ""}">
+<meta property="og:title" content="${title} · Spur">
+<meta property="og:description" content="${opts.desc || "Spur — the Toronto app for spontaneous in-person plans."}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Spur">
+<meta property="og:url" content="https://spur.surf/${opts.file || ""}">
+<meta property="og:image" content="https://spur.surf/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://spur.surf/assets/og.png">
+<meta name="theme-color" content="#F0EBE0">
+<meta name="color-scheme" content="light">
+<link rel="apple-touch-icon" href="/assets/icon.png">
+<link rel="icon" type="image/png" href="/assets/favicon.png">${opts.jsonld || ""}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -105,13 +125,16 @@ for (const p of PAGES) {
     continue;
   }
   let inner = html.slice(start, end).trim();
+  /* the slice runs to <footer>, which drags the card's closing tags along —
+     strip them (however many stacked up; rebuilds used to leak one per run) */
+  inner = inner.replace(/(<\/div>\s*<\/main>\s*)+$/, "").trim();
   inner = inner
     .replace(/Shahrad Shamasebloo \(sole proprietor, operating as [“"]Spur[”"]\)/g, "Spur Social Corp., a Canadian federal corporation")
     .replace(/Shahrad Shamasebloo \(operating as [“"]?Spur[”"]?\)/g, "Spur Social Corp.")
     .replace(/Shahrad Shamasebloo/g, "Spur Social Corp.")
     .replace(/shahrads@gmail\.com/g, "hello@spur.surf")
     .replace(/<strong>Last updated:<\/strong> July \d+, 2026/g, "<strong>Last updated:</strong> August 1, 2026");
-  fs.writeFileSync(p.file, chrome(p.title, inner));
+  fs.writeFileSync(p.file, chrome(p.title, inner, { file: p.file, desc: p.desc }));
   console.log(`rebuilt ${p.file} (${inner.length} chars of content)`);
 }
 
@@ -127,7 +150,8 @@ const contactInner = `<h1>Get in touch</h1>
 <p>To access, correct, or delete your personal information (see our <a href="/privacy.html">privacy policy</a>), email <a href="mailto:hello@spur.surf?subject=Privacy%20request">hello@spur.surf</a>. We respond within the timeframes required by law.</p>
 <hr>
 <p><strong>Spur Social Corp.</strong><br>Toronto, Ontario, Canada<br><a href="mailto:hello@spur.surf">hello@spur.surf</a></p>`;
-fs.writeFileSync("contact.html", chrome("Get in touch", contactInner));
+fs.writeFileSync("contact.html", chrome("Get in touch", contactInner, { file: "contact.html",
+  desc: "Get in touch with the Spur team in Toronto — beta invites, venue partnerships, safety reports, and privacy requests." }));
 console.log("built contact.html");
 
 const aboutInner = `<h1>About Spur</h1>
@@ -146,27 +170,45 @@ const aboutInner = `<h1>About Spur</h1>
 <h2>The company</h2>
 <p>Spur is built by <strong>Spur Social Corp.</strong>, a Canadian federal corporation headquartered in Toronto, Ontario. Want to reach us? <a href="/contact.html">Get in touch</a> — a real person reads it.</p>
 <p><a href="https://app.spur.surf">Open Spur in your browser</a> or join the <a href="mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)">iOS beta</a>.</p>`;
-fs.writeFileSync("about.html", chrome("About", aboutInner));
+fs.writeFileSync("about.html", chrome("About", aboutInner, { file: "about.html",
+  desc: "Spur is the Toronto app for spontaneous plans: post what you feel like doing — pickup basketball, patio drinks — and people nearby join in." }));
 console.log("built about.html");
 
+const FAQ = [
+  { q: "What is Spur?",
+    a: "An app for spontaneous, in-person plans in Toronto. Someone posts \"volleyball at Woodbine, 6pm\" — people nearby tap in — everyone shows up and plays. That's the whole product." },
+  { q: "Is it free?",
+    a: "Yes. Joining Spur and most events costs nothing. Some events carry a small <strong>refundable deposit</strong> — show up and it comes straight back. Ghost, and it doesn't. That's why plans on Spur actually happen." },
+  { q: "Who can join?",
+    a: "Anyone <strong>18 or older</strong> with a real mobile number. Every account is phone-verified — no bots, no burner accounts, no anonymous browsing." },
+  { q: "How do I get the app?",
+    a: "Spur is in a closed iOS beta (TestFlight), Toronto-first. Email <a href=\"mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)\">hello@spur.surf</a> for an invite — or use the full app in your browser right now at <a href=\"https://app.spur.surf\">app.spur.surf</a>." },
+  { q: "Is my location shared?",
+    a: "Never exactly. Your location is blurred to roughly one kilometre <em>before</em> it's stored, so other people only ever see your rough area. Details in the <a href=\"/privacy.html\">privacy policy</a>." },
+  { q: "How do deposits work?",
+    a: "Card details are handled entirely by Stripe — we never see your card number. Attend the event (or cancel with more than 24 hours' notice) and the deposit is refunded in full. No-show or cancel late, and the deposit goes to the host, minus a small platform fee." },
+  { q: "Someone made me uncomfortable. What do I do?",
+    a: "Use <strong>Block</strong> and <strong>Report</strong> in the app — reports are reviewed by a human and acted on. If you're in danger, call local emergency services (911 in Canada) first. More in our <a href=\"/safety-guidelines.html\">safety guidelines</a>." },
+  { q: "Can I put my venue on Spur?",
+    a: "Yes — bars, courts, studios, tracks. Email <a href=\"mailto:hello@spur.surf?subject=Venue%20partnership\">hello@spur.surf</a> with your venue's name and what you'd like to run." },
+  { q: "How do I delete my account?",
+    a: "In the app: Settings → delete account. Your profile and personal content are removed, as described in the <a href=\"/privacy.html\">privacy policy</a>." }
+];
 const faqInner = `<h1>Questions, answered</h1>
-<h2>What is Spur?</h2>
-<p>An app for spontaneous, in-person plans in Toronto. Someone posts "volleyball at Woodbine, 6pm" — people nearby tap in — everyone shows up and plays. That's the whole product.</p>
-<h2>Is it free?</h2>
-<p>Yes. Joining Spur and most events costs nothing. Some events carry a small <strong>refundable deposit</strong> — show up and it comes straight back. Ghost, and it doesn't. That's why plans on Spur actually happen.</p>
-<h2>Who can join?</h2>
-<p>Anyone <strong>18 or older</strong> with a real mobile number. Every account is phone-verified — no bots, no burner accounts, no anonymous browsing.</p>
-<h2>How do I get the app?</h2>
-<p>Spur is in a closed iOS beta (TestFlight), Toronto-first. Email <a href="mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)">hello@spur.surf</a> for an invite — or use the full app in your browser right now at <a href="https://app.spur.surf">app.spur.surf</a>.</p>
-<h2>Is my location shared?</h2>
-<p>Never exactly. Your location is blurred to roughly one kilometre <em>before</em> it's stored, so other people only ever see your rough area. Details in the <a href="/privacy.html">privacy policy</a>.</p>
-<h2>How do deposits work?</h2>
-<p>Card details are handled entirely by Stripe — we never see your card number. Attend the event (or cancel with more than 24 hours' notice) and the deposit is refunded in full. No-show or cancel late, and the deposit goes to the host, minus a small platform fee.</p>
-<h2>Someone made me uncomfortable. What do I do?</h2>
-<p>Use <strong>Block</strong> and <strong>Report</strong> in the app — reports are reviewed by a human and acted on. If you're in danger, call local emergency services (911 in Canada) first. More in our <a href="/safety-guidelines.html">safety guidelines</a>.</p>
-<h2>Can I put my venue on Spur?</h2>
-<p>Yes — bars, courts, studios, tracks. Email <a href="mailto:hello@spur.surf?subject=Venue%20partnership">hello@spur.surf</a> with your venue's name and what you'd like to run.</p>
-<h2>How do I delete my account?</h2>
-<p>In the app: Settings → delete account. Your profile and personal content are removed, as described in the <a href="/privacy.html">privacy policy</a>.</p>`;
-fs.writeFileSync("faq.html", chrome("FAQ", faqInner));
-console.log("built faq.html");
+` + FAQ.map((f) => `<h2>${f.q}</h2>\n<p>${f.a}</p>`).join("\n");
+/* FAQPage JSON-LD — the same questions, tags stripped, so search and
+   answer engines can quote Spur directly */
+const strip = (h) => h.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&rsquo;|&#8217;/g, "'").replace(/\s+/g, " ").trim();
+const faqLd = "\n<script type=\"application/ld+json\">" + JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ.map((f) => ({
+    "@type": "Question",
+    name: strip(f.q),
+    acceptedAnswer: { "@type": "Answer", text: strip(f.a) },
+  })),
+}) + "</scr" + "ipt>";
+fs.writeFileSync("faq.html", chrome("FAQ", faqInner, { file: "faq.html",
+  desc: "Quick answers about Spur: what it is, who can join, how deposits work, and how to get the app.",
+  jsonld: faqLd }));
+console.log("built faq.html (with FAQPage JSON-LD)");
