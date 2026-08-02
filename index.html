@@ -1694,7 +1694,10 @@ function buildRoad(){
     var csvg = el('svg',{viewBox:'0 0 ' + vw + ' ' + docH, preserveAspectRatio:'none'});
     host.appendChild(csvg);
     var PLAN = [
-      {k:'drinks',     at:0.29, w:600},
+      /* phones: the drinks crew starts lower — at 0.29 it crowds the
+         bike girls riding the line's opening sweep, and there's ample
+         empty road below (founder request 2026-08-01) */
+      {k:'drinks',     at:(vw < 640 ? 0.335 : 0.29), w:600},
       {k:'basketball', at:0.44, w:580},
       {k:'barbecue',   at:0.58, w:640},
       {k:'bocce',      at:0.72, w:560},
