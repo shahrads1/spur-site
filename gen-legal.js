@@ -42,6 +42,9 @@ const chrome = (title, inner, opts = {}) => `<!DOCTYPE html>
 <meta name="theme-color" content="#F0EBE0">
 <meta name="color-scheme" content="light">
 <link rel="apple-touch-icon" href="/assets/icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" href="/assets/favicon.png">${opts.jsonld || ""}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
