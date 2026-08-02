@@ -1380,14 +1380,13 @@ document.querySelectorAll('.layer').forEach(function(host){
       gLakeFront.appendChild(splash);
       return {fish:fish, splash:splash, x:sx, y:sy};
     }
-    /* on phones the spawn points ride higher and tuck in so the fish
-       jump from the on-screen stretch of the horizon lake (the fishers
-       stand a little below the crest there) — the fish-arc timelines
+    /* on phones the second spawn point tucks in so the fish jump from
+       the on-screen stretch of the horizon lake — the fish-arc timelines
        bake these coordinates in at build time, so the decision happens
        here, not in the layout pass */
     var phoneWater = window.innerWidth < 640;
-    window.__pond  = mkFish(1040, phoneWater ? 350 : 436);
-    window.__pond2 = mkFish(phoneWater ? 1120 : 1216, phoneWater ? 344 : 418);
+    window.__pond  = mkFish(1040, 436);
+    window.__pond2 = mkFish(phoneWater ? 1120 : 1216, 418);
 
     /* ---------------------------------------------------------------
        The goose family, v3 — proper Canada geese this time: black head
@@ -1556,7 +1555,7 @@ document.querySelectorAll('.layer').forEach(function(host){
            crest in front of it, rods over the water, desktop-style. */
         gLakeBack.setAttribute('transform',
           'translate(' + ((b0 + w * 0.62) - 838).toFixed(1) + ',0)');
-        var sL = 0.5, dxL = (b1 - 60) - sL * 1045, dyL = 526 - sL * 481;
+        var sL = 0.5, dxL = (b1 - 60) - sL * 1045, dyL = 484 - sL * 481;
         gLakeFront.setAttribute('transform',
           'translate(' + dxL.toFixed(1) + ',' + dyL.toFixed(1) + ') scale(' + sL + ')');
         /* the band only shows three field flowers — plant a few more,
