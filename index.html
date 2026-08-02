@@ -1234,16 +1234,23 @@ document.querySelectorAll('.layer').forEach(function(host){
     /* THE LAKE, on the horizon: painted BEHIND the hill crest so its
        left shore meets the hill's border, and it runs off the right
        edge of the screen — no visible end */
-    gBlobBack.appendChild(el('path',{
+    /* the far ends of the field live in movable groups: on phones the
+       slice-crop throws them away, so a narrow viewport pulls them into
+       the visible band (see the phone block after the build) */
+    var gLakeBack = el('g',{});
+    gBlobBack.appendChild(gLakeBack);
+    gLakeBack.appendChild(el('path',{
       d:'M 838 478 Q 858 392 990 370 Q 1130 354 1300 358 L 1470 356 L 1470 480 Z',
       fill:C.teal, stroke:C.ink,'stroke-width':2.4}));
-    gBlobBack.appendChild(el('path',{
+    gLakeBack.appendChild(el('path',{
       d:'M 886 460 Q 906 412 1010 400 Q 1160 388 1310 392 L 1440 390 L 1440 462 Z',
       fill:'#A6CBCF', stroke:'none', opacity:.6}));
-    gBlobBack.appendChild(el('path',{
+    gLakeBack.appendChild(el('path',{
       d:'M 920 440 Q 940 434 960 440 M 1040 424 Q 1060 418 1080 424 M 1180 408 Q 1200 402 1220 408 M 1320 428 Q 1340 423 1360 428',
       stroke:C.paper,'stroke-width':2.2,fill:'none','stroke-linecap':'round',opacity:.85}));
     gBlobBack.appendChild(el('path',{d:scallopPath(470, 62, 5), fill:'#A9C98A'}));
+    var gForestBack = el('g',{});
+    gBlobBack.appendChild(gForestBack);
     /* a little Tobermory on the BACK hill, shifted in from the edge.
        The yeti lives BEHIND the trees and wanders — sometimes he
        steps out at either end and just… looks at you. */
@@ -1253,7 +1260,7 @@ document.querySelectorAll('.layer').forEach(function(host){
       T.appendChild(el('path',{
         d:'M 0 -96 L 22 -62 L 12 -62 L 30 -34 L 16 -34 L 34 -6 L -34 -6 L -16 -34 L -30 -34 L -12 -62 L -22 -62 Z',
         fill:(dark ? '#4F7A38' : C.greenDk), stroke:C.ink,'stroke-width':1.8,'stroke-linejoin':'round'}));
-      gBlobBack.appendChild(T);
+      gForestBack.appendChild(T);
     }
     function cedar(x,y,s){
       var T = el('g',{transform:'translate('+x+','+y+') scale('+s+')'});
@@ -1261,7 +1268,7 @@ document.querySelectorAll('.layer').forEach(function(host){
       T.appendChild(el('path',{
         d:'M 0 -100 Q 16 -88 14 -58 Q 22 -44 16 -20 Q 10 -6 0 -6 Q -10 -6 -16 -20 Q -22 -44 -14 -58 Q -16 -88 0 -100 Z',
         fill:'#5C8A3E', stroke:C.ink,'stroke-width':1.8}));
-      gBlobBack.appendChild(T);
+      gForestBack.appendChild(T);
     }
     var yeti = el('g',{transform:'translate(175,502)'});
     yeti.appendChild(el('path',{d:'M -22 6 Q -26 -34 0 -40 Q 26 -34 22 6 Z',fill:'#F4F1E8',stroke:C.ink,'stroke-width':1.8}));
@@ -1272,7 +1279,7 @@ document.querySelectorAll('.layer').forEach(function(host){
     yeti.appendChild(el('circle',{cx:-4.4,cy:-21,r:1.3,fill:C.ink}));
     yeti.appendChild(el('circle',{cx:5.6,cy:-21,r:1.3,fill:C.ink}));
     yeti.appendChild(el('path',{d:'M -3 -12 Q 0 -10 3 -12',stroke:C.ink,'stroke-width':1.4,fill:'none','stroke-linecap':'round'}));
-    gBlobBack.appendChild(yeti);          /* behind every tree */
+    gForestBack.appendChild(yeti);        /* behind every tree */
     window.__yeti = yeti;
     spruce(95, 506, 0.95, true);
     cedar(140, 496, 0.8);
@@ -1295,7 +1302,24 @@ document.querySelectorAll('.layer').forEach(function(host){
     flower(gFly, 1140, 622, 0.85, C.yellow);
 
     /* two fishers on the crest, seen from BEHIND, rods out over
-       the horizon water; a fish gets tossed back into the bucket */
+       the horizon water; a fish gets tossed back into the bucket.
+       The whole fishing scene shares one group so the phone layout can
+       move it as a unit (animations inside it keep their coordinates). */
+    var gLakeFront = el('g',{});
+    gFly.appendChild(gLakeFront);
+    var gForestFront = el('g',{});
+    gFly.appendChild(gForestFront);
+    /* a pond for phones: hidden on desktop, where the rods reach the
+       horizon lake instead. Drawn first so the fishers stand at its shore.
+       Covers both fish spawn points (1040,436) and (1216,418). */
+    var pond = el('g',{display:'none'});
+    pond.appendChild(el('path',{
+      d:'M 955 420 Q 990 394 1080 396 Q 1200 392 1262 406 Q 1290 418 1272 432 Q 1210 448 1100 446 Q 990 446 960 434 Q 946 427 955 420 Z',
+      fill:C.teal, stroke:C.ink,'stroke-width':2.2}));
+    pond.appendChild(el('path',{
+      d:'M 1000 414 Q 1020 409 1040 414 M 1120 424 Q 1140 419 1160 424 M 1190 408 Q 1207 404 1224 408',
+      stroke:C.paper,'stroke-width':2,fill:'none','stroke-linecap':'round',opacity:.85}));
+    gLakeFront.appendChild(pond);
     function fisherBack(gx,gy,shirt,pants,skin,hair,dx){
       var F = el('g',{transform:'translate('+gx+','+gy+')'});
       F.appendChild(el('path',{d:'M -4 -14 L -4 0 M 4 -14 L 4 0',stroke:pants,'stroke-width':6,'stroke-linecap':'round',fill:'none'}));
@@ -1309,7 +1333,7 @@ document.querySelectorAll('.layer').forEach(function(host){
       F.appendChild(el('circle',{cx:0,cy:-52.5,r:8.9,fill:hair,stroke:'none'}));   /* back of the head — no face */
       F.appendChild(el('path',{d:'M '+(10*ax)+' -53 L '+(10*ax+dx)+' -84',stroke:C.ink,'stroke-width':2.2,'stroke-linecap':'round',fill:'none'}));
       F.appendChild(el('path',{d:'M '+(10*ax+dx)+' -84 L '+(10*ax+dx+4*ax)+' -44',stroke:C.ink,'stroke-width':1.1,fill:'none'}));
-      gFly.appendChild(F);
+      gLakeFront.appendChild(F);
       return F;
     }
     fisherBack(1000, 484, C.lilac, C.teal, SKIN[1], C.ink, 26);
@@ -1331,7 +1355,7 @@ document.querySelectorAll('.layer').forEach(function(host){
         textLength:'118',lengthAdjust:'spacingAndGlyphs'});
       t.textContent = 'A PARK NEAR YOU';
       S.appendChild(t);
-      gFly.appendChild(S);
+      gForestFront.appendChild(S);
     })();
 
     /* a bucket on the grass beside each fisher */
@@ -1347,7 +1371,7 @@ document.querySelectorAll('.layer').forEach(function(host){
         bucket.appendChild(bf);
         fills.push(bf);
       });
-      gFly.appendChild(bucket);
+      gLakeFront.appendChild(bucket);
       return {el:bucket, fills:fills, count:0};
     }
     window.__bucket  = mkBucket(952, 484);
@@ -1358,9 +1382,9 @@ document.querySelectorAll('.layer').forEach(function(host){
       fish.appendChild(el('ellipse',{cx:0,cy:0,rx:7,ry:3.6,fill:C.coral,stroke:C.ink,'stroke-width':1.4}));
       fish.appendChild(el('path',{d:'M 6 0 L 12 -4 L 12 4 Z',fill:C.coral,stroke:C.ink,'stroke-width':1.2}));
       fish.appendChild(el('circle',{cx:-3.4,cy:-1,r:0.9,fill:C.ink}));
-      gFly.appendChild(fish);
+      gLakeFront.appendChild(fish);
       var splash = el('circle',{cx:sx,cy:sy+2,r:6,fill:'none',stroke:C.paper,'stroke-width':2.4,opacity:0});
-      gFly.appendChild(splash);
+      gLakeFront.appendChild(splash);
       return {fish:fish, splash:splash, x:sx, y:sy};
     }
     window.__pond  = mkFish(1040, 436);
@@ -1497,6 +1521,52 @@ document.querySelectorAll('.layer').forEach(function(host){
     window.__bees = [mkBee(), mkBee()];
     cloud(gBlobBack, 150, 190, 1.1);
     cloud(gBlobBack, 920, 150, 0.8);
+
+    /* PHONES ONLY — the slice-crop hides both ends of the 1200-unit
+       field, which is where all the good stuff lives: the Tobermory
+       pines + park sign (left) and the whole fishing scene with the
+       lake (right). Pull each cluster into the visible band, slightly
+       smaller so the pair of them fits. Runs on the next frame so the
+       SVG has a laid-out rect; a wide band leaves everything exactly
+       where the desktop composition put it. */
+    (function phoneField(){
+      var endSvg = svg;
+      requestAnimationFrame(function(){
+        var vb = [0,0,1200,900];
+        var r  = endSvg.getBoundingClientRect();
+        if(!r.width) return;
+        var k  = Math.max(r.width / vb[2], r.height / vb[3]);
+        var w  = Math.min(vb[2], r.width / k);
+        var b0 = (vb[2] - w) / 2, b1 = b0 + w;
+        if(w >= 620) return;                       /* desktop/tablet: frozen */
+        /* The crest, where these live on desktop, is under the headline +
+           CTA on a phone — so both clusters drop into the open grass
+           between the CTA and the badminton pair instead. Down there the
+           front-hill fills would paint over anything in the back layer,
+           so the trees move to the front layer too (behind the sign). */
+        gFly.insertBefore(gForestBack, gLakeFront);
+        /* forest + sign: tree-line base lands lower-left */
+        var sF = 0.55, aFx = 180.5, aFy = 505, tFx = b0 + 70, tFy = 600;
+        var trF = 'translate(' + (tFx - sF * aFx).toFixed(1) + ',' +
+                  (tFy - sF * aFy).toFixed(1) + ') scale(' + sF + ')';
+        gForestBack.setAttribute('transform', trF);
+        gForestFront.setAttribute('transform', trF);
+        /* fishing scene: feet land lower-right, at the shore of the pond
+           (the pond only exists on phones — desktop rods reach the lake) */
+        pond.removeAttribute('display');
+        var sL = 0.6, aLx = 1045, aLy = 481, tLx = b1 - 104, tLy = 615;
+        gLakeFront.setAttribute('transform',
+          'translate(' + (tLx - sL * aLx).toFixed(1) + ',' +
+          (tLy - sL * aLy).toFixed(1) + ') scale(' + sL + ')');
+        /* the band only shows three field flowers — plant a few more,
+           clear of the new clusters */
+        [[0.06,730,C.yellow],[0.30,715,C.paper],[0.44,760,C.lilac],
+         [0.58,648,C.paper],[0.72,752,C.paper],[0.94,700,C.yellow]]
+          .forEach(function(ff){
+            flower(gBlob, b0 + ff[0] * w, ff[1], 0.95, ff[2]);
+          });
+      });
+    })();
   } else {
     /* the road itself is global (one piece) — sections only add sky */
     cloud(gBlob, key==='a'||key==='c' ? 110 : 950, 200, 1.05);
@@ -2633,12 +2703,14 @@ if(!REDUCED){
     /* keep the family in the open grass under the copy, not walking
        through the CTA and the meta line */
     var GY = (band[1] - band[0]) < 620 ? 706 : 690;
-    var crossings = 0;
+    /* the park keeper is unpredictable: the old set fades after one OR
+       two crossings, decided by coin flip each time */
+    var clearAfter = 1 + Math.round(Math.random());
     var tl = gsap.timeline({repeat:-1, repeatDelay:5,
       onStart: scheduleDrops,
       onRepeat: function(){
-        crossings++;
-        if(crossings % 2 === 0){
+        if(--clearAfter <= 0){
+          clearAfter = 1 + Math.round(Math.random());
           gsap.to(poopLayer, {opacity:0, duration:0.8, onComplete:function(){
             poopLayer.innerHTML = ''; poopLayer.setAttribute('opacity','1');
           }});
