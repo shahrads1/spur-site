@@ -2185,27 +2185,55 @@ function buildRoad(){
     try {
       var cvb2 = (SCENE_VB.cycling || '0 0 1280 832').split(/\s+/);
       var cW0 = +cvb2[2], cH0 = +cvb2[3];
-      var cw2 = vw < 640 ? vw * 0.72 : Math.min(620, vw * 0.42);
+      var cw2 = vw < 640 ? vw * 0.64 : Math.min(620, vw * 0.42);
       var csc3 = cw2 / cW0, ch2 = cH0 * csc3;
       var vhN = window.innerHeight || 900;
-      var L0 = road.llen * 0.05;
-      /* phones: the edge-clamp can pin the line vertically along a screen
-         edge for its whole opening run — riding THAT reads as floating
-         beside the path. Skip ahead to where the line is actually
-         sweeping across the screen (clear of both clamp rails) so the
-         girls sit wheels-on-line exactly like the desktop. */
-      var edgeOK = function(px){ return vw >= 640 || (px > 34 && px < vw - 34); };
-      for(var Ls = 0; Ls <= road.llen; Ls += 50){
-        var pp0 = road.line.getPointAtLength(Ls);
-        if(pp0.y >= vhN * 1.72 && edgeOK(pp0.x)){ L0 = Ls; break; }
+      var L0 = road.llen * 0.05, bx2, by2, ang3;
+      if(vw < 640){
+        /* PHONES — exact analytic placement (founder-marked spec: wheels
+           on the black line, inside the red path). The art's four wheel
+           bottoms sit on a HORIZONTAL ground line (y=345 of 416), so a
+           rotation equal to the line's local angle lays that ground line
+           parallel to the ink line; anchoring one contact point ON it
+           puts every wheel on the line. The group is pinned near the
+           right edge; we walk the line's descending sweep to the point
+           that crosses the lead rider's contact x and solve the
+           rotation-aware vertical offset there. No innerHeight involved
+           (Safari's collapsing bars made that unstable). */
+        bx2 = vw - cw2 - 6;
+        var CC = {x:320, y:208}, LEADC = {x:470, y:345};
+        ang3 = -48;                                       /* fallback */
+        by2 = vhN * 1.4;
+        for(var Ls2 = 80; Ls2 <= road.llen; Ls2 += 24){
+          var q0 = road.line.getPointAtLength(Ls2);
+          if(q0.y < vhN * 0.9) continue;                  /* clear the hero */
+          var qa = road.line.getPointAtLength(Math.max(0, Ls2 - 50));
+          var qb = road.line.getPointAtLength(Math.min(road.llen, Ls2 + 50));
+          var rDeg = Math.atan2(qb.y - qa.y, qb.x - qa.x) * 180 / Math.PI;
+          if(rDeg > 90) rDeg -= 180; if(rDeg < -90) rDeg += 180;
+          var rAbs = Math.abs(rDeg);
+          if(rAbs < 25 || rAbs > 78) continue;            /* need a sweep */
+          var rr = rDeg * Math.PI / 180, dxA = LEADC.x - CC.x, dyA = LEADC.y - CC.y;
+          var rx = dxA * Math.cos(rr) - dyA * Math.sin(rr) + CC.x;
+          var ry = dxA * Math.sin(rr) + dyA * Math.cos(rr) + CC.y;
+          if(q0.x <= bx2 + rx * csc3){                    /* line reached the contact x */
+            ang3 = rDeg;
+            by2  = q0.y - ry * csc3;
+            break;
+          }
+        }
+      } else {
+        for(var Ls = 0; Ls <= road.llen; Ls += 50){
+          if(road.line.getPointAtLength(Ls).y >= vhN * 1.72){ L0 = Ls; break; }
+        }
+        var pOn2 = road.line.getPointAtLength(L0);
+        var pA3 = road.line.getPointAtLength(Math.max(0, L0 - 70));
+        var pB3 = road.line.getPointAtLength(Math.min(road.llen, L0 + 70));
+        ang3 = Math.atan2(pB3.y - pA3.y, pB3.x - pA3.x) * 180 / Math.PI;
+        if(ang3 > 90) ang3 -= 180; if(ang3 < -90) ang3 += 180;
+        bx2 = Math.min(Math.max(pOn2.x - cw2 * 0.3, 10), Math.max(10, vw - cw2 - 10));
+        by2 = pOn2.y - ch2 * 0.94;
       }
-      var pOn2 = road.line.getPointAtLength(L0);
-      var pA3 = road.line.getPointAtLength(Math.max(0, L0 - 70));
-      var pB3 = road.line.getPointAtLength(Math.min(road.llen, L0 + 70));
-      var ang3 = Math.atan2(pB3.y - pA3.y, pB3.x - pA3.x) * 180 / Math.PI;
-      if(ang3 > 90) ang3 -= 180; if(ang3 < -90) ang3 += 180;
-      var bx2 = Math.min(Math.max(pOn2.x - cw2 * 0.3, 10), Math.max(10, vw - cw2 - 10));
-      var by2 = pOn2.y - ch2 * 0.94;
       var cwrap2 = el('g', {'class':'cast', opacity:window.__castShown ? 1 : 0});
       var cg2 = el('g', {transform:'translate(' + bx2.toFixed(1) + ',' + by2.toFixed(1) + ') scale(' + csc3.toFixed(4) + ') rotate(' + ang3.toFixed(1) + ' ' + (cW0/2) + ' ' + (cH0/2) + ')'});
       cg2.innerHTML = SCENES.cycling;
