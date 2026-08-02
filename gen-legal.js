@@ -12,6 +12,10 @@ const PAGES = [
   { file: "safety-guidelines.html", title: "Safety guidelines" },
 ];
 
+// The smiley+spikes mark (eyes + smile + yellow sparks lifted from the SPUR
+// wordmark). Red dots are reserved for unread-message badges only.
+const MARK = `<svg class="mk" viewBox="383 136 204 330" aria-hidden="true"><g transform="translate(0,691) scale(0.1,-0.1)" class="mk-face"><path d="M5340 4267 c-53 -17 -123 -93 -149 -163 -51 -134 -47 -240 11 -363 135 -285 436 -216 479 108 37 276 -133 484 -341 418z"/><path d="M4023 4199 c-147 -56 -209 -278 -143 -509 54 -193 277 -241 414 -89 140 154 132 397 -17 541 -79 76 -158 94 -254 57z"/><path d="M5454 3130 c-32 -16 -94 -60 -136 -98 -153 -137 -265 -175 -518 -175 -261 0 -402 38 -597 159 -154 97 -287 47 -271 -101 13 -110 145 -255 299 -330 302 -145 761 -155 1073 -23 153 65 318 203 381 318 100 185 -45 343 -231 250z"/></g><g class="mk-spark" stroke-width="23" stroke-linecap="round" fill="none"><path d="M433.2 225.8L391.8 197.8"/><path d="M460.4 204.9L438.9 142.5"/><path d="M495.6 204.9L517.1 142.5"/><path d="M522.8 225.8L564.2 197.8"/></g></svg>`;
+
 const chrome = (title, inner) => `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,7 +32,10 @@ const chrome = (title, inner) => `<!DOCTYPE html>
   body{background:var(--cream);color:var(--ink);font-family:'Bricolage Grotesque',system-ui,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
   .top{position:sticky;top:0;background:var(--cream);border-bottom:2px solid var(--ink);padding:14px 24px;display:flex;align-items:center;gap:14px;z-index:5}
   .top a.brand{font-weight:800;font-size:20px;color:var(--path);text-decoration:none;display:flex;align-items:center;gap:8px}
-  .top a.brand i{width:10px;height:10px;border-radius:99px;background:var(--path);display:inline-block}
+  .mk{width:auto;display:block;overflow:visible}
+  .mk .mk-face{fill:var(--path)}
+  .mk .mk-spark{stroke:#FFC02E}
+  .top a.brand .mk{height:22px}
   .top .crumb{font-family:'Space Mono',monospace;font-size:12.5px;opacity:.65}
   main{max-width:760px;margin:40px auto 64px;padding:0 24px}
   .card{background:var(--paper);border:2px solid var(--ink);border-radius:22px;padding:40px 44px;box-shadow:6px 6px 0 rgba(42,46,43,.12)}
@@ -45,7 +52,7 @@ const chrome = (title, inner) => `<!DOCTYPE html>
   footer{border-top:2px solid var(--ink);background:var(--cream);padding:34px 24px 44px;font-family:'Space Mono',monospace;font-size:13px}
   .fin{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;gap:18px 40px;align-items:flex-start;justify-content:space-between}
   .fbrand{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;display:flex;align-items:center;gap:8px}
-  .fbrand i{width:10px;height:10px;border-radius:99px;background:var(--path);display:inline-block}
+  .fbrand .mk{height:21px}
   footer small{display:block;font-size:12px;line-height:1.8;opacity:.75}
   footer small a{color:inherit}
   footer nav{display:flex;flex-direction:column;gap:7px}
@@ -56,7 +63,7 @@ const chrome = (title, inner) => `<!DOCTYPE html>
 </head>
 <body>
 <div class="top">
-  <a class="brand" href="/"><i></i>Spur</a>
+  <a class="brand" href="/">${MARK}Spur</a>
   <span class="crumb">/ ${title.toLowerCase()}</span>
 </div>
 <main><div class="card">
@@ -65,7 +72,7 @@ ${inner}
 <footer>
   <div class="fin">
     <div>
-      <div class="fbrand"><i></i>Spur</div>
+      <div class="fbrand">${MARK}Spur</div>
       <small>&copy; 2026 Spur Social Corp.<br>Toronto, Ontario, Canada<br><a href="mailto:hello@spur.surf">hello@spur.surf</a></small>
     </div>
     <nav aria-label="Legal">

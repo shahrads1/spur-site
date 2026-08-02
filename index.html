@@ -467,7 +467,6 @@
     font-size:26px;line-height:1;color:var(--ink);opacity:.5;
   }
   .lm-x:hover{opacity:1}
-  .lm-dot{width:38px;height:38px;border-radius:50%;background:var(--coral);margin:0 auto 12px}
   .lm-card h3{font-size:22px;font-weight:800;letter-spacing:-0.03em}
   .lm-card p{font-size:13px;opacity:.7;margin-top:4px}
   .lm-card input{
@@ -784,7 +783,9 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
     align-items:flex-start;justify-content:space-between;
   }
   #site-foot .fbrand{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;display:flex;align-items:center;gap:8px}
-  #site-foot .fbrand i{width:10px;height:10px;border-radius:99px;background:var(--path);display:inline-block}
+  #site-foot .fbrand .fmk{height:21px;width:auto;display:block;overflow:visible}
+  #site-foot .fbrand .fmk .mk-face{fill:var(--path)}
+  #site-foot .fbrand .fmk .mk-spark{stroke:#FFC02E}
   #site-foot small{display:block;font-size:12px;line-height:1.8;opacity:.75}
   #site-foot small a{color:inherit}
   /* the page styles bare <nav> as fixed chrome — footer navs must opt out
@@ -798,7 +799,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
 <footer id="site-foot">
   <div class="fin">
     <div>
-      <div class="fbrand"><i></i>Spur</div>
+      <div class="fbrand"><svg class="fmk" viewBox="383 136 204 330" aria-hidden="true"><g transform="translate(0,691) scale(0.1,-0.1)" class="mk-face"><path d="M5340 4267 c-53 -17 -123 -93 -149 -163 -51 -134 -47 -240 11 -363 135 -285 436 -216 479 108 37 276 -133 484 -341 418z"/><path d="M4023 4199 c-147 -56 -209 -278 -143 -509 54 -193 277 -241 414 -89 140 154 132 397 -17 541 -79 76 -158 94 -254 57z"/><path d="M5454 3130 c-32 -16 -94 -60 -136 -98 -153 -137 -265 -175 -518 -175 -261 0 -402 38 -597 159 -154 97 -287 47 -271 -101 13 -110 145 -255 299 -330 302 -145 761 -155 1073 -23 153 65 318 203 381 318 100 185 -45 343 -231 250z"/></g><g class="mk-spark" stroke-width="23" stroke-linecap="round" fill="none"><path d="M433.2 225.8L391.8 197.8"/><path d="M460.4 204.9L438.9 142.5"/><path d="M495.6 204.9L517.1 142.5"/><path d="M522.8 225.8L564.2 197.8"/></g></svg>Spur</div>
       <small>&copy; 2026 Spur Social Corp.<br>Toronto, Ontario, Canada<br><a href="mailto:hello@spur.surf">hello@spur.surf</a></small>
     </div>
     <nav aria-label="Legal">
