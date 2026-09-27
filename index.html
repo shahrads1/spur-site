@@ -563,6 +563,11 @@
     font-size:26px;line-height:1;color:var(--ink);opacity:.5;
   }
   .lm-x:hover{opacity:1}
+  /* touch screens: invisible 44px hit area around the close buttons, no visual change */
+  @media (pointer:coarse){
+    .ex-x{position:relative}
+    .lm-x::after,.ex-x::after{content:'';position:absolute;inset:-10px -12px}
+  }
   .lm-card h3{font-size:22px;font-weight:800;letter-spacing:-0.03em}
   .lm-card p{font-size:13px;opacity:.7;margin-top:4px}
   .lm-card input{
@@ -691,9 +696,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
   </div>
 </div>
 
-<!-- login modal — Google / phone / email, wired to Supabase Auth.
-     PASTE YOUR SUPABASE PROJECT URL + ANON KEY in the SUPABASE config
-     down in the script to go live; until then it reports demo mode. -->
+<!-- login modal: Google / phone / email via Supabase Auth -->
 <div id="loginModal" hidden>
   <div class="lm-card">
     <button class="lm-x" aria-label="Close">&times;</button>
@@ -3180,11 +3183,11 @@ document.querySelectorAll('[data-reveal]').forEach(function(n){
 var EVENTS = [
   {q:'ping-pong ping pong table tennis', n:'Basement Ping-Pong Ladder', v:'SPiN Toronto', km:1.2, t:'today', tt:'Tonight 7:30', s:2, c:C.teal, h:'Marcus L.', d:'Casual ladder night, all levels. Paddles provided, winner stays on. We grab a booth after the last round.'},
   {q:'drinks patio', n:'Golden Hour Patio Hang', v:'Kensington Market', km:1.8, t:'today', tt:'Tonight 9:00', s:4, c:C.lilac, h:'Priya S.', d:'Low-key patio session while the weather holds. First round is on the host if you bring a good story.'},
-  {q:'bocce ball', n:'Sunset Bocce', v:'Christie Pits', km:2.1, t:'today', tt:'Tonight 6:45', s:3, c:C.green, h:'Tony R.', d:'Bocce on the west lawn until the light goes. Total beginners welcome — Tony explains the rules in one minute.'},
+  {q:'bocce ball', n:'Sunset Bocce', v:'Christie Pits', km:2.1, t:'today', tt:'Tonight 6:45', s:3, c:C.green, h:'Tony R.', d:'Bocce on the west lawn until the light goes. Total beginners welcome. Tony explains the rules in one minute.'},
   {q:'board games cards euchre', n:'Euchre & Snacks', v:'Snakes & Lattes', km:2.4, t:'today', tt:'Tonight 7:00', s:3, c:C.yellow, h:'Dana K.', d:'Euchre table booked for four. Snacks on the table, stakes purely reputational.'},
   {q:'basketball ball pickup', n:'3-on-3 Pickup', v:'Trinity Bellwoods', km:2.9, t:'tomorrow', tt:'Tomorrow 6:30', s:2, c:C.teal, h:'Jerome W.', d:'Half-court 3-on-3, first to 21. Bring water and a light + dark shirt.'},
-  {q:'run running jog', n:'Waterfront Run Club', v:'Martin Goodman Trail', km:3.1, t:'tomorrow', tt:'Tomorrow 6:00', s:8, c:C.green, h:'Ana M.', d:'Easy 6k along the water, conversational pace. Nobody gets dropped — coffee at the turnaround.'},
-  {q:'badminton racket', n:'Drop-in Badminton', v:'High Park courts', km:3.4, t:'today', tt:'Tonight 8:00', s:1, c:C.yellow, h:'Wei C.', d:'Doubles rotation, one court, spare racket available. One spot left — grab it.'},
+  {q:'run running jog', n:'Waterfront Run Club', v:'Martin Goodman Trail', km:3.1, t:'tomorrow', tt:'Tomorrow 6:00', s:8, c:C.green, h:'Ana M.', d:'Easy 6k along the water, conversational pace. Nobody gets dropped. Coffee at the turnaround.'},
+  {q:'badminton racket', n:'Drop-in Badminton', v:'High Park courts', km:3.4, t:'today', tt:'Tonight 8:00', s:1, c:C.yellow, h:'Wei C.', d:'Doubles rotation, one court, spare racket available. One spot left, grab it.'},
   {q:'soccer football ball', n:'Casual 5-a-side', v:'Ramsden Park', km:4.4, t:'tomorrow', tt:'Tomorrow 7:00', s:3, c:C.green, h:'Lucas F.', d:'Friendly 5-a-side, jumpers for goalposts energy. All feet welcome, no slide tackles.'},
   {q:'picnic blanket', n:'Golden Hour Picnic', v:'Riverdale Park East', km:4.9, t:'weekend', tt:'Sun 5:00', s:5, c:C.lilac, h:'Noor A.', d:'Potluck picnic on the hill with the skyline view. Bring one thing to share and a blanket if you have one.'},
   {q:'cycling bike ride', n:'Night Ride', v:'Don Valley trails', km:5.6, t:'today', tt:'Tonight 8:30', s:2, c:C.teal, h:'Sam D.', d:'Relaxed night loop through the valley, lights required. Regroup at every bridge, nobody rides alone.'},
@@ -3435,7 +3438,7 @@ function openApp(){
     /* phones get the NATIVE app: try the deep link; if Spur isn't
        installed, fall through to the store (or the beta invite until the
        store listing exists). No web-app-on-a-phone. */
-    var fallback = APP_STORE_URL || 'mailto:hello@spur.surf?subject=' + encodeURIComponent('Spur beta (Toronto) — send me the app');
+    var fallback = APP_STORE_URL || 'mailto:hello@spur.surf?subject=' + encodeURIComponent('Spur beta (Toronto): send me the app');
     var t = setTimeout(function(){ location.href = fallback; }, 1600);
     window.addEventListener('pagehide', function(){ clearTimeout(t); }, {once:true});
     document.addEventListener('visibilitychange', function(){ if(document.hidden) clearTimeout(t); }, {once:true});
@@ -3545,7 +3548,7 @@ modal.querySelector('.lm-x').addEventListener('click', function(){ modal.hidden 
 document.addEventListener('keydown', function(e){ if(e.key === 'Escape') modal.hidden = true; });
 
 document.getElementById('lmGoogle').addEventListener('click', function(){
-  if(!sbReady()){ note('Demo mode — paste the Supabase URL + anon key into the SUPABASE block to enable Google sign-in.'); return; }
+  if(!sbReady()){ note('Sign-in is unavailable right now. Please try again in a minute.'); return; }
   location.href = SUPABASE.url + '/auth/v1/authorize?provider=google&redirect_to='
     + encodeURIComponent(location.origin + location.pathname);
 });
@@ -3554,18 +3557,18 @@ document.getElementById('lmSend').addEventListener('click', function(){
   if(!ph){ note('Enter your phone number first.'); return; }
   if(!sbReady()){
     document.getElementById('lmCodeRow').hidden = false;
-    note('Demo mode — with Supabase keys pasted in, this texts a real code.');
+    note('Sign-in is unavailable right now. Please try again in a minute.');
     return;
   }
   sbFetch('otp', {phone: ph}).then(function(r){
-    if(r.ok){ document.getElementById('lmCodeRow').hidden = false; note('Code sent — check your phone.'); }
+    if(r.ok){ document.getElementById('lmCodeRow').hidden = false; note('Code sent. Check your phone.'); }
     else note(r.j.msg || r.j.error_description || 'Could not send the code.');
   });
 });
 document.getElementById('lmVerify').addEventListener('click', function(){
   var ph = document.getElementById('lmPhone').value.trim();
   var code = document.getElementById('lmCode').value.trim();
-  if(!sbReady()){ note('Demo mode — verification activates once the Supabase keys are in.'); return; }
+  if(!sbReady()){ note('Sign-in is unavailable right now. Please try again in a minute.'); return; }
   sbFetch('verify', {type:'sms', phone: ph, token: code}).then(function(r){
     if(r.ok && r.j.access_token) loggedIn(r.j, true); else note(r.j.msg || 'That code didn’t work.');
   });
@@ -3580,7 +3583,7 @@ function emailCreds(){
 }
 document.getElementById('lmLogin').addEventListener('click', function(){
   var cr = emailCreds(); if(!cr) return;
-  if(!sbReady()){ note('Demo mode — email login activates once the Supabase keys are in.'); return; }
+  if(!sbReady()){ note('Sign-in is unavailable right now. Please try again in a minute.'); return; }
   sbFetch('token?grant_type=password', cr).then(function(r){
     if(r.ok && r.j.access_token) loggedIn(r.j, true);
     else note(r.j.error_description || r.j.msg || 'That email and password didn’t match.');
@@ -3589,11 +3592,11 @@ document.getElementById('lmLogin').addEventListener('click', function(){
 document.getElementById('lmSignup').addEventListener('click', function(){
   var cr = emailCreds(); if(!cr) return;
   if(cr.password.length < 8){ note('Pick a password with at least 8 characters.'); return; }
-  if(!sbReady()){ note('Demo mode — sign-up activates once the Supabase keys are in.'); return; }
+  if(!sbReady()){ note('Sign-in is unavailable right now. Please try again in a minute.'); return; }
   sbFetch('signup', cr).then(function(r){
     if(r.ok && r.j.access_token) loggedIn(r.j, true);
-    else if(r.ok) note('Almost there — confirm your email from your inbox, then log in here.');
-    else note(r.j.msg || r.j.error_description || 'Could not create the account — try another email.');
+    else if(r.ok) note('Almost there. Confirm your email from your inbox, then log in here.');
+    else note(r.j.msg || r.j.error_description || 'Could not create the account. Try another email.');
   });
 });
 /* returning from Google OAuth: Supabase puts tokens in the URL hash.

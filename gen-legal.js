@@ -144,9 +144,9 @@ for (const p of PAGES) {
 const contactInner = `<h1>Get in touch</h1>
 <p>Spur is built in Toronto by <strong>Spur Social Corp.</strong> Whatever it's about, a real person reads it.</p>
 <h2>Join the iOS beta</h2>
-<p>Spur is in a closed beta, Toronto-first. Want in? Email <a href="mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)">hello@spur.surf</a> and say hi — or just <a href="https://app.spur.surf">open Spur in your browser</a> right now.</p>
+<p>Spur is in a closed beta, Toronto-first. Want in? Email <a href="mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)">hello@spur.surf</a> and say hi, or just <a href="https://app.spur.surf">open Spur in your browser</a> right now.</p>
 <h2>Put your venue on Spur</h2>
-<p>Bars, courts, studios, karting tracks — if people can meet up there, we want you on the map. Email <a href="mailto:hello@spur.surf?subject=Venue%20partnership">hello@spur.surf</a> with your venue's name and what you'd like to run.</p>
+<p>Bars, courts, studios, karting tracks: if people can meet up there, we want you on the map. Email <a href="mailto:hello@spur.surf?subject=Venue%20partnership">hello@spur.surf</a> with your venue's name and what you'd like to run.</p>
 <h2>Safety &amp; reports</h2>
 <p>Something happened that shouldn't have? Use the in-app <strong>report</strong> tools (they reach us fastest), or email <a href="mailto:hello@spur.surf?subject=Safety%20report">hello@spur.surf</a>. Reports are reviewed by a human.</p>
 <h2>Privacy requests</h2>
@@ -154,46 +154,43 @@ const contactInner = `<h1>Get in touch</h1>
 <hr>
 <p><strong>Spur Social Corp.</strong><br>Toronto, Ontario, Canada<br><a href="mailto:hello@spur.surf">hello@spur.surf</a></p>`;
 fs.writeFileSync("contact.html", chrome("Get in touch", contactInner, { file: "contact.html",
-  desc: "Get in touch with the Spur team in Toronto — beta invites, venue partnerships, safety reports, and privacy requests." }));
+  desc: "Get in touch with the Spur team in Toronto: beta invites, venue partnerships, safety reports, and privacy requests." }));
 console.log("built contact.html");
 
 const aboutInner = `<h1>About Spur</h1>
-<p><strong>Spur is the app for spontaneous plans.</strong> Post what you feel like doing — pickup basketball, patio drinks, a sunset paddle — and people nearby join in. Tonight, not "sometime."</p>
+<p><strong>Spur is the app for spontaneous plans.</strong> Post what you feel like doing (pickup basketball, patio drinks, a sunset paddle) and people nearby join in. Tonight, not "sometime."</p>
 <h2>Why we built it</h2>
-<p>Every group chat has the same graveyard: "we should hang out soon." Six people, forty messages, nobody commits. Spur skips the negotiation — you see plans that already have a time and a place, and you either join or you don't.</p>
+<p>Every group chat has the same graveyard: "we should hang out soon." Six people, forty messages, nobody commits. Spur skips the negotiation. You see plans that already have a time and a place, and you either join or you don't.</p>
 <h2>Built so people actually show up</h2>
 <ul>
-<li><strong>Real people only</strong> — every account is phone-verified. No bots, no burners.</li>
-<li><strong>Reliability is visible</strong> — hosts and joiners build a track record; flaking has a cost.</li>
-<li><strong>Refundable deposits</strong> — hosts can ask for a small deposit that comes right back when you show up.</li>
-<li><strong>Safety first</strong> — block and report tools, photo moderation, and <a href="/community-guidelines.html">community guidelines</a> with teeth.</li>
+<li><strong>Real people only.</strong> Every account is phone-verified. No bots, no burners.</li>
+<li><strong>Reliability is visible.</strong> Hosts and joiners build a track record; flaking has a cost.</li>
+<li><strong>Safety first.</strong> Block and report tools, photo moderation, and <a href="/community-guidelines.html">community guidelines</a> with teeth.</li>
 </ul>
 <h2>Toronto first</h2>
-<p>We're starting with one city — ours. Christie Pits bocce, High Park badminton, Kensington patios. Once spontaneous hangouts feel effortless here, we'll grow.</p>
+<p>We're starting with one city: ours. Christie Pits bocce, High Park badminton, Kensington patios. Once spontaneous hangouts feel effortless here, we'll grow.</p>
 <h2>The company</h2>
-<p>Spur is built by <strong>Spur Social Corp.</strong>, a Canadian federal corporation headquartered in Toronto, Ontario. Want to reach us? <a href="/contact.html">Get in touch</a> — a real person reads it.</p>
+<p>Spur is built by <strong>Spur Social Corp.</strong>, a Canadian federal corporation headquartered in Toronto, Ontario. Want to reach us? <a href="/contact.html">Get in touch</a>. A real person reads it.</p>
 <p><a href="https://app.spur.surf">Open Spur in your browser</a> or join the <a href="mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)">iOS beta</a>.</p>`;
 fs.writeFileSync("about.html", chrome("About", aboutInner, { file: "about.html",
-  desc: "Spur is the Toronto app for spontaneous plans: post what you feel like doing — pickup basketball, patio drinks — and people nearby join in." }));
+  desc: "Spur is the Toronto app for spontaneous plans: post what you feel like doing, like pickup basketball or patio drinks, and people nearby join in." }));
 console.log("built about.html");
 
 const FAQ = [
   { q: "What is Spur?",
-    a: "An app for spontaneous, in-person plans in Toronto. Someone posts \"volleyball at Woodbine, 6pm\" — people nearby tap in — everyone shows up and plays. That's the whole product." },
+    a: "An app for spontaneous, in-person plans in Toronto. Someone posts \"volleyball at Woodbine, 6pm\", people nearby tap in, and everyone shows up and plays." },
   { q: "Is it free?",
-    a: "Yes. Joining Spur and most events costs nothing. Some events carry a small <strong>refundable deposit</strong> — show up and it comes straight back. Ghost, and it doesn't. That's why plans on Spur actually happen." },
+    a: "Yes. Joining Spur and joining events costs nothing." },
   { q: "Who can join?",
-    a: "Anyone <strong>18 or older</strong> with a real mobile number. Every account is phone-verified — no bots, no burner accounts, no anonymous browsing." },
+    a: "Anyone <strong>18 or older</strong> with a real mobile number. Every account is phone-verified, so there are no bots or burner accounts." },
   { q: "How do I get the app?",
-    a: "Spur is in a closed iOS beta (TestFlight), Toronto-first. Email <a href=\"mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)\">hello@spur.surf</a> for an invite — or use the full app in your browser right now at <a href=\"https://app.spur.surf\">app.spur.surf</a>." },
+    a: "Spur is in a closed iOS beta (TestFlight), Toronto-first. Email <a href=\"mailto:hello@spur.surf?subject=Spur%20beta%20(Toronto)\">hello@spur.surf</a> for an invite, or use the full app in your browser right now at <a href=\"https://app.spur.surf\">app.spur.surf</a>." },
   { q: "Is my location shared?",
     a: "Never exactly. Your location is blurred to roughly one kilometre <em>before</em> it's stored, so other people only ever see your rough area. Details in the <a href=\"/privacy.html\">privacy policy</a>." },
-  { q: "How do deposits work?",
-    a: "Card details are handled entirely by Stripe — we never see your card number. Attend the event (or cancel with more than 24 hours' notice) and the deposit is refunded in full. No-show or cancel late, and the deposit goes to the host, minus a small platform fee." },
   { q: "Someone made me uncomfortable. What do I do?",
-    a: "Use <strong>Block</strong> and <strong>Report</strong> in the app — reports are reviewed by a human and acted on. If you're in danger, call local emergency services (911 in Canada) first. More in our <a href=\"/safety-guidelines.html\">safety guidelines</a>." },
+    a: "Use <strong>Block</strong> and <strong>Report</strong> in the app. Reports are reviewed by a human and acted on. If you're in danger, call local emergency services (911 in Canada) first. More in our <a href=\"/safety-guidelines.html\">safety guidelines</a>." },
   { q: "Can I put my venue on Spur?",
-    a: "Yes — bars, courts, studios, tracks. Email <a href=\"mailto:hello@spur.surf?subject=Venue%20partnership\">hello@spur.surf</a> with your venue's name and what you'd like to run." },
+    a: "Yes: bars, courts, studios, tracks. Email <a href=\"mailto:hello@spur.surf?subject=Venue%20partnership\">hello@spur.surf</a> with your venue's name and what you'd like to run." },
   { q: "How do I delete my account?",
     a: "In the app: Settings → delete account. Your profile and personal content are removed, as described in the <a href=\"/privacy.html\">privacy policy</a>." }
 ];
@@ -212,6 +209,6 @@ const faqLd = "\n<script type=\"application/ld+json\">" + JSON.stringify({
   })),
 }) + "</scr" + "ipt>";
 fs.writeFileSync("faq.html", chrome("FAQ", faqInner, { file: "faq.html",
-  desc: "Quick answers about Spur: what it is, who can join, how deposits work, and how to get the app.",
+  desc: "Quick answers about Spur: what it is, who can join, how your location is handled, and how to get the app.",
   jsonld: faqLd }));
 console.log("built faq.html (with FAQPage JSON-LD)");

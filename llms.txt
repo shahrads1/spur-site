@@ -1,21 +1,19 @@
 # Spur
 
 > Spur is a Toronto-first mobile app for spontaneous in-person plans. Someone
-> posts a real activity at a real place and time — pickup basketball, bocce,
-> patio drinks — and people nearby join. Optional refundable deposits make
-> people actually show up.
+> posts a real activity at a real place and time (pickup basketball, bocce,
+> patio drinks) and people nearby join. It's free to use.
 
 Operated by Spur Social Corp., a Canadian federal corporation in Toronto,
 Ontario. Every account is phone-verified; users must be 18 or older. Location
-is blurred to roughly one kilometre before storage. Payments are handled by
-Stripe; Spur never sees card numbers.
+is blurred to roughly one kilometre before storage.
 
 ## Pages
 
 - [Home](https://spur.surf/): what Spur is, live example plans
 - [About](https://spur.surf/about.html): why it exists, how it keeps people accountable
-- [FAQ](https://spur.surf/faq.html): pricing (free), age (18+), deposits, safety, data
-- [Contact](https://spur.surf/contact.html): hello@spur.surf — beta invites, venues, safety, privacy
+- [FAQ](https://spur.surf/faq.html): pricing (free), age (18+), safety, data
+- [Contact](https://spur.surf/contact.html): hello@spur.surf for beta invites, venues, safety, privacy
 - [Privacy policy](https://spur.surf/privacy.html)
 - [Terms of service](https://spur.surf/terms.html)
 - [Community guidelines](https://spur.surf/community-guidelines.html)
@@ -24,4 +22,4 @@ Stripe; Spur never sees card numbers.
 ## App
 
 - [Web app](https://app.spur.surf/): the full product in the browser (login required)
-- iOS: closed beta via TestFlight, Toronto-first — email hello@spur.surf
+- iOS: Toronto-first beta; email hello@spur.surf for an invite
