@@ -69,7 +69,7 @@
 <main><div class="card">
 <h1>Spur — Privacy Policy</h1>
 <p><strong>Effective date:</strong> July 4, 2026
-<strong>Last updated:</strong> August 1, 2026</p>
+<strong>Last updated:</strong> September 27, 2026</p>
 <p>Spur ("Spur", "we", "us") is operated by <strong>Spur Social Corp., a Canadian federal corporation</strong>, based in <strong>Ontario, Canada</strong>. This policy explains what personal information we collect, why, how we use and share it, and your rights. It applies to the Spur mobile app and related services (the "Service").</p>
 <p>By using Spur you agree to this policy. If you do not agree, do not use the Service.</p>
 <h2>1. Who can use Spur</h2>
@@ -81,10 +81,13 @@
 - <strong>Approximate location</strong> — see Section 4. We collect a location you provide/permit; we <strong>blur it to roughly 1 km before storing it</strong> and never store your exact GPS position.
 - <strong>Payment information</strong> — when an event requires a deposit, a card is collected. <strong>Card numbers are handled entirely by Stripe; we never see or store your full card number.</strong> We store a Stripe customer reference and a card fingerprint used only for fraud/abuse prevention.
 - <strong>Identity verification</strong> — if you use ID verification, it is processed by Stripe Identity; we receive only a pass/fail result and verification level, not your ID document.
+- <strong>Email address</strong> — if you sign in with Apple or Google, or add an email to your account, for sign-in and verification.
+- <strong>Contacts (optional)</strong> — only if you choose to find friends from your contacts. Phone numbers are turned into one-way codes on your device and only those codes are sent. We use them to show which contacts are already on Spur and do not store them.
 - <strong>Content you create</strong> — events, posts, messages, reviews, reports, and feedback.</p>
 <p><strong>We collect automatically:</strong>
 - <strong>Usage and device data</strong> — app interactions, device type, and a push-notification token (if you enable notifications).
-- <strong>Check-in location</strong> — when you check in to an event, your device reports a location used only to confirm you're near the venue.</p>
+- <strong>Check-in location</strong> — when you check in to an event, your device reports a location used only to confirm you're near the venue.
+- <strong>Crash and diagnostic data</strong> — when the app or website runs into an error: the error details, the screen it happened on, the app version, and your device type and operating system. Used only to find and fix problems, never for advertising.</p>
 <h2>3. How we use your information</h2>
 <ul>
 <li>To create and run your account and the core features (events, RSVPs, host approvals, "It's ON" notifications).</li>
@@ -92,14 +95,16 @@
 <li>To process deposits and no-show charges for events that have them.</li>
 <li>To show you relevant nearby plans and venues.</li>
 <li>To send you service notifications you've enabled.</li>
-<li>To keep people safe (reviewing reports, enforcing our rules, blocking/removing users).</li>
+<li>To keep people safe (reviewing reports, enforcing our rules, blocking/removing users), including automatically screening uploaded photos for prohibited content.</li>
+<li>To find and fix bugs and crashes.</li>
 <li>To comply with law.</li>
 </ul>
 <h2>4. Location — how we protect it</h2>
 <p>Your exact location is <strong>never stored or shown to other users.</strong> Coordinates are rounded/blurred to approximately 1 km on our servers before saving, so others only ever see your rough area. Check-in uses your device's reported location solely to confirm proximity to the venue at that moment.</p>
 <h2>5. How we share information</h2>
 <p>We do <strong>not</strong> sell your personal information. We share it only with:
-- <strong>Service providers ("processors")</strong> who run parts of Spur for us, under contract: <strong>Supabase</strong> (database, authentication, storage), <strong>Stripe</strong> (payments and identity), <strong>Twilio</strong> (SMS one-time passcodes), <strong>Expo</strong> (push notifications), and <strong>Railway</strong> (server hosting).
+- <strong>Service providers ("processors")</strong> who run parts of Spur for us, under contract: <strong>Supabase</strong> (database, authentication, storage), <strong>Stripe</strong> (payments and identity), <strong>Twilio</strong> (SMS one-time passcodes), <strong>Expo</strong> (push notifications), <strong>Railway</strong> (server hosting), <strong>Resend</strong> (email verification codes), <strong>Amazon Web Services</strong> (automated photo moderation), <strong>Microsoft PhotoDNA</strong> (detecting known child sexual abuse imagery in uploaded photos), and <strong>Sentry</strong> (crash reporting).
+- <strong>Apple and Google</strong>, only if you choose to sign in with them. They confirm your identity to us under their own privacy policies.
 - <strong>Other users</strong>, only what your profile and posts are meant to show (e.g., first name, photo, reliability score, your public events) — never your phone number, exact location, or payment details.
 - <strong>Legal/safety</strong> — if required by law, or to protect the safety of people or the platform.
 - <strong>Business transfers</strong> — if Spur is involved in a merger, acquisition, or asset sale, information may transfer as part of that deal.</p>
