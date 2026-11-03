@@ -742,13 +742,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
       <input inputmode="numeric" id="lmCode" placeholder="6-digit code">
       <button class="lm-mini" id="lmVerify">Verify</button>
     </div>
-    <div class="lm-div"><span>or classic email</span></div>
-    <input type="email" id="lmEmail" placeholder="you@email.com" autocomplete="email">
-    <input type="password" id="lmPass" placeholder="Password" autocomplete="current-password">
-    <div class="lm-row2">
-      <button id="lmLogin">Log in</button>
-      <button id="lmSignup">Sign up</button>
-    </div>
+    <p class="lm-terms" style="font-size:12px;opacity:.75;margin-top:12px">By continuing you agree to Spur&rsquo;s <a href="/terms.html">Terms</a> and <a href="/privacy.html">Privacy Policy</a>, and confirm you&rsquo;re 18 or older.</p>
     <div class="lm-note" id="lmNote"></div>
   </div>
 </div>
@@ -848,7 +842,7 @@ c264 5 300 11 442 81 278 137 419 359 419 661 -1 305 -130 519 -396 660 -169
       <div class="eyebrow">The timing</div>
       <h2>Tonight, not next month.</h2>
       <p>Most plans go up the same day. Open Spur after work and there&rsquo;s usually something on within a couple of kilometres.</p>
-      <button class="btn" data-beta>Join the Toronto beta <i>&rsaquo;</i></button>
+      <button class="btn" data-beta>Get Spur <i>&rsaquo;</i></button>
     </div>
   </div>
 </section>
@@ -3318,9 +3312,7 @@ document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !exEl
 /* ---------- section CTAs ---------- */
 if(window.matchMedia('(max-width: 640px)').matches){ document.querySelectorAll('#caps .cap').forEach(function(b){ b.textContent = 'Go to app'; }); }
 document.querySelectorAll('[data-beta]').forEach(function(b){
-  b.addEventListener('click', function(){
-    location.href = 'mailto:hello@spur.surf?subject=' + encodeURIComponent('Spur beta (Toronto)');
-  });
+  b.addEventListener('click', function(){ if(window.openApp) window.openApp(); else location.href = APP_STORE_URL; });
 });
 
 /* ---------- the MESSAGE BIRDS ----------
@@ -3431,14 +3423,16 @@ function sbFetch(path, body){
 var MS_KEY = 'spur_ms_session';
 /* Open the web app; when we hold a live session, hand it over in the URL
    hash so the person is NOT asked to log in again on app.spur.surf. */
-var APP_STORE_URL = '';   /* ← paste the App Store link here the day the listing goes live */
+/* Spur on the App Store (App Store Connect app id 6787741516, eas.json).
+   Publish this page only AFTER the version is released in App Store Connect,
+   or the link opens an unavailable listing. */
+var APP_STORE_URL = 'https://apps.apple.com/app/id6787741516';
 function openApp(){
   var isPhone = /iPhone|iPad|Android/i.test(navigator.userAgent) || window.matchMedia('(max-width: 900px)').matches;
   if(isPhone){
     /* phones get the NATIVE app: try the deep link; if Spur isn't
-       installed, fall through to the store (or the beta invite until the
-       store listing exists). No web-app-on-a-phone. */
-    var fallback = APP_STORE_URL || 'mailto:hello@spur.surf?subject=' + encodeURIComponent('Spur beta (Toronto): send me the app');
+       installed, fall through to the App Store. No web-app-on-a-phone. */
+    var fallback = APP_STORE_URL;
     var t = setTimeout(function(){ location.href = fallback; }, 1600);
     window.addEventListener('pagehide', function(){ clearTimeout(t); }, {once:true});
     document.addEventListener('visibilitychange', function(){ if(document.hidden) clearTimeout(t); }, {once:true});
@@ -3552,8 +3546,13 @@ document.getElementById('lmGoogle').addEventListener('click', function(){
   location.href = SUPABASE.url + '/auth/v1/authorize?provider=google&redirect_to='
     + encodeURIComponent(location.origin + location.pathname);
 });
+function e164(raw){
+  var d = (raw || '').replace(/\D/g, '');
+  if(d.length === 10) d = '1' + d;
+  return d ? '+' + d : '';
+}
 document.getElementById('lmSend').addEventListener('click', function(){
-  var ph = document.getElementById('lmPhone').value.trim();
+  var ph = e164(document.getElementById('lmPhone').value);
   if(!ph){ note('Enter your phone number first.'); return; }
   if(!sbReady()){
     document.getElementById('lmCodeRow').hidden = false;
@@ -3566,37 +3565,11 @@ document.getElementById('lmSend').addEventListener('click', function(){
   });
 });
 document.getElementById('lmVerify').addEventListener('click', function(){
-  var ph = document.getElementById('lmPhone').value.trim();
+  var ph = e164(document.getElementById('lmPhone').value);
   var code = document.getElementById('lmCode').value.trim();
   if(!sbReady()){ note('Sign-in is unavailable right now. Please try again in a minute.'); return; }
   sbFetch('verify', {type:'sms', phone: ph, token: code}).then(function(r){
     if(r.ok && r.j.access_token) loggedIn(r.j, true); else note(r.j.msg || 'That code didn’t work.');
-  });
-});
-/* classic email: existing members log in, new people sign up on the spot */
-function emailCreds(){
-  var em = document.getElementById('lmEmail').value.trim();
-  var pw = document.getElementById('lmPass').value;
-  if(!em || em.indexOf('@') === -1){ note('Enter your email first.'); return null; }
-  if(!pw){ note('Enter a password too.'); return null; }
-  return {email: em, password: pw};
-}
-document.getElementById('lmLogin').addEventListener('click', function(){
-  var cr = emailCreds(); if(!cr) return;
-  if(!sbReady()){ note('Sign-in is unavailable right now. Please try again in a minute.'); return; }
-  sbFetch('token?grant_type=password', cr).then(function(r){
-    if(r.ok && r.j.access_token) loggedIn(r.j, true);
-    else note(r.j.error_description || r.j.msg || 'That email and password didn’t match.');
-  });
-});
-document.getElementById('lmSignup').addEventListener('click', function(){
-  var cr = emailCreds(); if(!cr) return;
-  if(cr.password.length < 8){ note('Pick a password with at least 8 characters.'); return; }
-  if(!sbReady()){ note('Sign-in is unavailable right now. Please try again in a minute.'); return; }
-  sbFetch('signup', cr).then(function(r){
-    if(r.ok && r.j.access_token) loggedIn(r.j, true);
-    else if(r.ok) note('Almost there. Confirm your email from your inbox, then log in here.');
-    else note(r.j.msg || r.j.error_description || 'Could not create the account. Try another email.');
   });
 });
 /* returning from Google OAuth: Supabase puts tokens in the URL hash.

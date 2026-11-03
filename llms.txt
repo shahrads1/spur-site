@@ -13,7 +13,7 @@ is blurred to roughly one kilometre before storage.
 - [Home](https://spur.surf/): what Spur is, live example plans
 - [About](https://spur.surf/about.html): why it exists, how it keeps people accountable
 - [FAQ](https://spur.surf/faq.html): pricing (free), age (18+), safety, data
-- [Contact](https://spur.surf/contact.html): hello@spur.surf for beta invites, venues, safety, privacy
+- [Contact](https://spur.surf/contact.html): hello@spur.surf for support, venues, safety, privacy
 - [Privacy policy](https://spur.surf/privacy.html)
 - [Terms of service](https://spur.surf/terms.html)
 - [Community guidelines](https://spur.surf/community-guidelines.html)
@@ -22,4 +22,4 @@ is blurred to roughly one kilometre before storage.
 ## App
 
 - [Web app](https://app.spur.surf/): the full product in the browser (login required)
-- iOS: Toronto-first beta; email hello@spur.surf for an invite
+- iOS: on the App Store (https://apps.apple.com/app/id6787741516), Toronto-first
