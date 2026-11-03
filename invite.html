@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>You're invited · Spur</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="You've been invited to a private plan on Spur.">
+<meta property="og:title" content="You're invited to a plan on Spur">
+<meta property="og:description" content="Tap to open the invite in the Spur app.">
+<meta property="og:image" content="https://spur.surf/assets/og.png">
+<meta name="theme-color" content="#F0EBE0">
+<meta name="color-scheme" content="light">
+<!-- Shows Spur's App Store banner in Safari; with Spur installed it reads "Open". -->
+<meta name="apple-itunes-app" content="app-id=6787741516">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root{--cream:#F0EBE0;--path:#DE4F2B;--ink:#2A2E2B;--paper:#FFFFFF}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--cream);color:var(--ink);font-family:'Bricolage Grotesque',system-ui,sans-serif;padding:24px 16px}
+  main{width:100%;max-width:420px;text-align:center}
+  h1{font-weight:800;font-size:30px;margin:0 0 10px}
+  p{font-size:17px;line-height:1.5;margin:0 0 18px}
+  a.btn{display:block;width:100%;padding:16px;border-radius:14px;font-weight:800;font-size:17px;text-decoration:none;margin-bottom:12px}
+  .primary{background:var(--path);color:var(--paper)}
+  .secondary{background:var(--paper);color:var(--ink);border:1.5px solid var(--ink)}
+  .quiet{color:var(--ink);opacity:.7;font-size:15px;text-decoration:underline}
+  .small{font-size:14px;opacity:.7}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <h1>You're invited 🎉</h1>
+  <p id="msg">Opening the plan in Spur…</p>
+  <div id="actions" hidden>
+    <a class="btn primary" id="openApp" href="#">Open in the Spur app</a>
+    <a class="btn secondary" id="store" href="https://apps.apple.com/app/id6787741516">Get Spur on the App Store</a>
+    <p class="small">Just installed it? Sign in, then come back and tap <strong>Open in the Spur app</strong>.</p>
+    <a class="quiet" id="web" href="https://app.spur.surf">Or open it in your browser</a>
+  </div>
+  <p id="bad" hidden>This invite link looks incomplete. Ask the host to send it again.</p>
+</main>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var e = q.get('e') || '', t = q.get('t') || '';
+  if(!/^\d{1,10}$/.test(e) || !/^[A-Za-z0-9_\-]{10,80}$/.test(t)){
+    document.getElementById('msg').hidden = true;
+    document.getElementById('bad').hidden = false;
+    return;
+  }
+  var path = 'event/' + e + '?invite=' + encodeURIComponent(t);
+  var appUrl = 'manusspurapp://' + path;
+  var webUrl = 'https://app.spur.surf/' + path;
+  document.getElementById('openApp').href = appUrl;
+  document.getElementById('web').href = webUrl;
+
+  var isPhone = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isPhone){ location.replace(webUrl); return; }
+
+  // Try the app straight away. If it opens, this page goes to the
+  // background; if not (Spur not installed), show the choices.
+  var shown = false;
+  function showChoices(){
+    if(shown) return; shown = true;
+    document.getElementById('msg').textContent = 'Only people the host invited can see this plan. Open it in the Spur app:';
+    document.getElementById('actions').hidden = false;
+  }
+  var timer = setTimeout(showChoices, 1500);
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) clearTimeout(timer); else showChoices(); });
+  window.addEventListener('pagehide', function(){ clearTimeout(timer); });
+  location.href = appUrl;
+})();
+</script>
+</body>
+</html>
