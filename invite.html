@@ -47,13 +47,18 @@
 <script>
 (function(){
   var q = new URLSearchParams(location.search);
-  var e = q.get('e') || '', t = q.get('t') || '';
-  if(!/^\d{1,10}$/.test(e) || !/^[A-Za-z0-9_\-]{10,80}$/.test(t)){
+  var e = q.get('e') || '', t = q.get('t') || '', p = q.get('p') || '';
+  // Three link shapes: private event invite (?e=ID&t=TOKEN), public event
+  // (?e=ID) and shared plan (?p=ID). Anything else is refused.
+  var path, isPrivate = false;
+  if(/^\d{1,10}$/.test(e) && /^[A-Za-z0-9_\-]{10,80}$/.test(t)){ path = 'event/' + e + '?invite=' + encodeURIComponent(t); isPrivate = true; }
+  else if(/^\d{1,10}$/.test(e) && !t && !p){ path = 'event/' + e; }
+  else if(/^\d{1,10}$/.test(p) && !e && !t){ path = 'post/' + p; }
+  if(!path){
     document.getElementById('msg').hidden = true;
     document.getElementById('bad').hidden = false;
     return;
   }
-  var path = 'event/' + e + '?invite=' + encodeURIComponent(t);
   var appUrl = 'manusspurapp://' + path;
   var webUrl = 'https://app.spur.surf/' + path;
   document.getElementById('openApp').href = appUrl;
@@ -67,7 +72,7 @@
   var shown = false;
   function showChoices(){
     if(shown) return; shown = true;
-    document.getElementById('msg').textContent = 'Only people the host invited can see this plan. Open it in the Spur app:';
+    document.getElementById('msg').textContent = isPrivate ? 'Only people the host invited can see this plan. Open it in the Spur app:' : 'Open this plan in the Spur app:';
     document.getElementById('actions').hidden = false;
   }
   var timer = setTimeout(showChoices, 1500);
